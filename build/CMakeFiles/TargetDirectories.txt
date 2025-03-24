@@ -1,8 +1,0 @@
-/home/jorik/cpp_proj/iot_mon_v2/build/CMakeFiles/edit_cache.dir
-/home/jorik/cpp_proj/iot_mon_v2/build/CMakeFiles/rebuild_cache.dir
-/home/jorik/cpp_proj/iot_mon_v2/build/proto/CMakeFiles/proto.dir
-/home/jorik/cpp_proj/iot_mon_v2/build/proto/CMakeFiles/edit_cache.dir
-/home/jorik/cpp_proj/iot_mon_v2/build/proto/CMakeFiles/rebuild_cache.dir
-/home/jorik/cpp_proj/iot_mon_v2/build/edge_service/CMakeFiles/edge_service.dir
-/home/jorik/cpp_proj/iot_mon_v2/build/edge_service/CMakeFiles/edit_cache.dir
-/home/jorik/cpp_proj/iot_mon_v2/build/edge_service/CMakeFiles/rebuild_cache.dir

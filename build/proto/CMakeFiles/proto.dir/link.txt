@@ -1,2 +1,0 @@
-/usr/bin/ar qc libproto.a CMakeFiles/proto.dir/generated/edge_service.pb.cc.o CMakeFiles/proto.dir/generated/edge_service.grpc.pb.cc.o
-/usr/bin/ranlib libproto.a
