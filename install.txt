@@ -1,8 +1,0 @@
-conan install .. --build=missing --output-folder=. -s compiler.cppstd=17
-
-cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
-
-cmake --build . -- -j$(nproc)
-
-
-conan install .. -of . --build=missing -s compiler.cppstd=17 -o "grpc/*:shared=True" -o "grpc/*:with_abseil=True"
