@@ -1,0 +1,844 @@
+{
+	"inputs" : 
+	[
+		{
+			"path" : "CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/CMakeFiles/3.28.3/CMakeSystem.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/conan_toolchain.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeSystemSpecificInitialize.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/Linux-Initialize.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/CMakeFiles/3.28.3/CMakeCXXCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeSystemSpecificInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeGenericSystem.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeInitializeConfigs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/Linux.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/UnixPaths.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeCXXInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeLanguageInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/GNU-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/Linux-GNU-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/Linux-GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/conan_toolchain.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/protobuf-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/protobuf-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/protobufTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/protobuf-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/protobuf-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/ZLIBConfigVersion.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/ZLIBConfig.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/ZLIBTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/ZLIB-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/ZLIB-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/proto85a97d7dc3070/p/lib/cmake/protobuf/protobuf-generate.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/proto85a97d7dc3070/p/lib/cmake/protobuf/protobuf-options.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/proto85a97d7dc3070/p/lib/cmake/protobuf/protobuf-module.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/proto85a97d7dc3070/p/lib/cmake/protobuf/protobuf-options.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/proto85a97d7dc3070/p/lib/cmake/protobuf/protobuf-conan-protoc-target.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/gRPCConfigVersion.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/gRPCConfig.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/gRPCTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/gRPC-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/gRPC-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/absl-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/absl-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/abslTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/absl-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/absl-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/absei0bec7bd7bd9c5/p/lib/cmake/conan_trick/cxx_std.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/c-ares-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/c-ares-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/c-aresTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/c-ares-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/c-ares-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/OpenSSLConfigVersion.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/OpenSSLConfig.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/OpenSSLTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/OpenSSL-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/OpenSSL-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/opensd67cfcc050699/p/lib/cmake/conan-official-openssl-variables.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/re2-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/re2-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/re2Targets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/re2-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/re2-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libsystemd-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libsystemd-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libsystemdTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libsystemd-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libsystemd-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libcap-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libcap-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libcapTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libcap-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libcap-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libmount-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libmount-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libmountTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libmount-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libmount-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libxcrypt-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libxcrypt-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libxcryptTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libxcrypt-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libxcrypt-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libselinux-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libselinux-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libselinuxTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libselinux-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/libselinux-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/PCRE2ConfigVersion.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/PCRE2Config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/PCRE2Targets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/PCRE2-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/PCRE2-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/BZip2ConfigVersion.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/BZip2Config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/BZip2Targets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/BZip2-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/BZip2-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/bzip2884d3edb1b059/p/lib/cmake/conan-official-bzip2-variables.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/lz4-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/lz4-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/lz4Targets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/lz4-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/lz4-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/LibLZMAConfigVersion.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/LibLZMAConfig.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/LibLZMATargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/LibLZMA-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/LibLZMA-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/xz_ut07386eb568d69/p/lib/cmake/conan-official-xz_utils-variables.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/zstd-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/zstd-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/zstdTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/zstd-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/zstd-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/protobuf-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/protobuf-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/protobufTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/protobuf-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/protobuf-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/proto85a97d7dc3070/p/lib/cmake/protobuf/protobuf-generate.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/proto85a97d7dc3070/p/lib/cmake/protobuf/protobuf-options.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/proto85a97d7dc3070/p/lib/cmake/protobuf/protobuf-module.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/proto85a97d7dc3070/p/lib/cmake/protobuf/protobuf-options.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/proto85a97d7dc3070/p/lib/cmake/protobuf/protobuf-conan-protoc-target.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/grpc818aebdb9f01a/p/lib/cmake/conan_trick/grpc_cpp_plugin.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/grpc818aebdb9f01a/p/lib/cmake/conan_trick/grpc_csharp_plugin.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/grpc818aebdb9f01a/p/lib/cmake/conan_trick/grpc_node_plugin.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/grpc818aebdb9f01a/p/lib/cmake/conan_trick/grpc_objective_c_plugin.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/grpc818aebdb9f01a/p/lib/cmake/conan_trick/grpc_php_plugin.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/grpc818aebdb9f01a/p/lib/cmake/conan_trick/grpc_python_plugin.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/jorik/.conan2/p/b/grpc818aebdb9f01a/p/lib/cmake/conan_trick/grpc_ruby_plugin.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindThreads.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckLibraryExists.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckIncludeFileCXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/redis++-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/redis++-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/redis++Targets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/redis++-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/redis++-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/hiredis-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/hiredis-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/hiredisTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/hiredis-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/hiredis-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/hiredis-config-version.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/hiredis-config.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/cmakedeps_macros.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/hiredisTargets.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/hiredis-release-x86_64-data.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build/hiredis-Target-release.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"path" : "proto/CMakeLists.txt"
+		},
+		{
+			"path" : "edge_service/CMakeLists.txt"
+		}
+	],
+	"kind" : "cmakeFiles",
+	"paths" : 
+	{
+		"build" : "/home/jorik/cpp_proj/iot_mon_v2/build",
+		"source" : "/home/jorik/cpp_proj/iot_mon_v2"
+	},
+	"version" : 
+	{
+		"major" : 1,
+		"minor" : 0
+	}
+}

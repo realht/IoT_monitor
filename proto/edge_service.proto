@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package iot.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message SensorData {
+  string device_id = 1;
+  double temperature = 2;
+  double humidity = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message Ack {
+  bool success = 1;
+  string message = 2;
+}
+
+service EdgeService {
+  rpc StreamTelemetry(stream SensorData) returns (Ack);
+}

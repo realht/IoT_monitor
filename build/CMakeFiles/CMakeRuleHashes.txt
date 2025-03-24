@@ -1,0 +1,2 @@
+# Hashes of file build rules.
+64f93baf035d896be40fb839967f0067 proto/generated/edge_service.pb.cc
