@@ -76,7 +76,7 @@ void RunServer(){
 }
 
 int main(){
-	std::cout << "!!!1231112999999\n";
+	std::cout << "Greating to sync grpc req server\n";
 	RunServer();
 	return 0;	
 	}
