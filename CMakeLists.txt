@@ -2,9 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(RealTimeIoT LANGUAGES CXX)
 
 include_directories(
-  ${CMAKE_BINARY_DIR}/proto/generated
-  /home/jorik/.conan2/p/b/grpc818aebdb9f01a/p/include
-)
+  ${CMAKE_BINARY_DIR}/proto/generated)
 
 # === Global Settings ===
 set(CMAKE_CXX_STANDARD 20)
