@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package iot.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message SensorData {
+  string device_id = 1;
+  double temperature = 2;
+  double humidity = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message Alert {
+  string device_id = 1;
+  string metric_type = 2;   //temperature/humidity/etc
+  double current_value = 3;
+  double expected_value = 4;
+  string severity = 5;      //low/medium/critical
+  google.protobuf.Timestamp timestamp = 6;
+}

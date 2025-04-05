@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package iot.v1;
+
+import "common.proto";
+import "google/protobuf/timestamp.proto";
+
+service AnalyticsService {
+  rpc GetRealtimeStats(StatRequest) returns (stream StatResponse);
+  rpc SubscribeToAlerts(AlertSubscription) returns (stream Alert);
+}
+
+message StatRequest {
+  enum AggregationType {
+    AVG = 0;
+    MIN = 1;
+    MAX = 2;
+    STDDEV = 3;
+  }
+
+  repeated string device_id = 1;
+  AggregationType aggregation = 2;
+  uint32 window_seconds = 3;
+}
+
+message StatResponse {
+  map<string, double> metrics = 1;
+  google.protobuf.Timestamp timestamp = 2;
+}
+
+message AlertSubscription {
+  repeated string device_ids = 1;
+  repeated string metric_types = 2;
+  repeated string severity_levels = 3;
+}

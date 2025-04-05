@@ -1,0 +1,5 @@
+ghz --insecure -n 100000 -c 100 \
+    --proto proto/edge_service.proto \
+    --call iot.v1.EdgeService.StreamTelemetry \
+    -d '{"device_id":"sensor_021","temperature":75.5,"humidity":30,"timestamp":"2024-05-20T12:00:00Z"}' \
+    localhost:50051

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <grpcpp/grpcpp.h>
+#include "common.pb.h"
 #include "edge_service.grpc.pb.h"
 #include <sw/redis++/redis++.h>
 #include <vector>
@@ -28,9 +29,12 @@ using iot::v1::EdgeService;
 namespace supp_var{
 	const std::string REDIS_SERV_ADRESS = "tcp://localhost:6379";
 	const std::string EGDE_SERV_ADDRESS = "0.0.0.0:50051";
+	const std::string STREAM_NAME = "telemetry_stream";
     constexpr size_t ASYNC_INTERVAL_MS = 10;
     constexpr size_t MAX_CONCURRENT_STREAMS = 1000000;
 }
+
+
 
 //глобальный флаг для graceful shutdown
 std::atomic<bool> shutdown_requested{false};
@@ -183,7 +187,7 @@ private:
 				{"temperature", std::to_string(data.temperature())},
 				{"humidity", std::to_string(data.humidity())},
 				{"timestamp", std::to_string(data.timestamp().seconds())}};
-			redis->xadd("telemetry_stream", "*",
+			redis->xadd(supp_var::STREAM_NAME, "*",
 					entires.begin(),entires.end());
 			//std::cout << "data: " << entires.front().second<< '\n';
 		}catch(const std::exception& e){
