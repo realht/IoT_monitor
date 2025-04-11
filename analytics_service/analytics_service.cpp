@@ -1,10 +1,6 @@
 #include <iostream>
 #include <sw/redis++/redis++.h>
 #include <grpcpp/grpcpp.h>
-#include <prometheus/exposer.h>
-#include <prometheus/registry.h>
-#include <prometheus/counter.h>
-#include <prometheus/gauge.h>
 #include "memory"
 #include <atomic>
 #include <thread>
@@ -24,6 +20,7 @@
 #include <string_view>
 #include <iterator>
 #include "redis_stream_parser.h"
+#include "prometheus_metrics.h"
 
 using namespace std::chrono_literals;
 using grpc::Server;
@@ -41,7 +38,10 @@ using iot::v1::SensorData;
 size_t line_counter=0;
 
 namespace supp_var{
-	const std::string REDIS_SERV_ADRESS = "tcp://localhost:6379";
+	const std::string REDIS_SERV_ADRESS = []{
+        const char* env = std::getenv("REDIS_HOST");
+        return env ? env : "tcp://localhost:6379";
+    }();
 	const std::string ANALYS_SERV_ADDRESS = "0.0.0.0:50052";
     const std::string PROMETHEUS_ADDRESS = "0.0.0.0:8081";
     //const std::string CONSUMER_GROUP = "analystics_grp";
@@ -56,8 +56,6 @@ namespace supp_var{
 }
 
 
-
-
 std::atomic<bool> shutdown_requested{false};
 
 class MetricAggregator {
@@ -69,7 +67,8 @@ public:
         double max = std::numeric_limits<double>::min();
     };
 
-    void add_value(const std::string& device_id, double value, int64_t timespamp){
+    void add_value(const std::string& device_id, double value, int64_t timespamp,
+                iot::metrics::PrometheusMetrics& metrics){
         std::unique_lock lock(mutex_);
         auto& data = metrics_[device_id];
         data.values.emplace_back(value,timespamp);
@@ -82,7 +81,8 @@ public:
             timespamp - data.values.front().second > supp_var::AGGREGGATION_WINDOW_SEC){
                 data.sum -= data.values.front().first;
                 data.values.pop_front();
-            }
+        }
+        metrics.aggregation_window().Set(data.values.size());
     }
 
     std::optional<Metrics> get_metrics(const std::string& device_id) const {
@@ -99,7 +99,8 @@ private:
 
 class AlertManager {
 public:
-    void check_thresholds(const SensorData& data){
+    void check_thresholds(const SensorData& data, 
+                        iot::metrics::PrometheusMetrics& metrics){
         bool alert = false;
         Alert alert_msg;
         alert_msg.set_device_id(data.device_id());
@@ -121,6 +122,7 @@ public:
 
         if(alert){
             std::lock_guard lock(alerts_mutex_);
+            metrics.alerts_triggered().Increment();
             alerts_queue_.push_back(alert_msg);
         }
     }
@@ -164,7 +166,7 @@ public:
 
     Status SubscribeToAlerts(ServerContext* context, const AlertSubscription* sub,
                             ServerWriter<Alert>* writer) override {
-        while(!context->IsCancelled() && shutdown_requested.load()){
+        while(!context->IsCancelled() && !shutdown_requested.load()){
             auto alerts = alert_manager_->get_alerts();
             for(const auto& alert : alerts){
                 if(mathes_subscription(alert, *sub)){
@@ -211,12 +213,16 @@ private:
 };
 
 void redis_consumer(std::shared_ptr<MetricAggregator> aggregator,
-                    std::shared_ptr<AlertManager> alert_manager) {
+                    std::shared_ptr<AlertManager> alert_manager,
+                    iot::metrics::PrometheusMetrics& metrics,
+                    std::stop_token st) {
     auto redis = std::make_shared<sw::redis::Redis>(supp_var::REDIS_SERV_ADRESS);
     std::string last_id = "0-0";
 
-    while (!shutdown_requested.load()) {
+    while (!st.stop_requested()) {
         try {
+            auto start = std::chrono::steady_clock::now();
+
             iot::parser::RedisStreamParser::StreamResult result;
 
             redis->xread(supp_var::STREAM_NAME,
@@ -225,19 +231,22 @@ void redis_consumer(std::shared_ptr<MetricAggregator> aggregator,
                          supp_var::MAX_BATCH_SIZE,
                          std::inserter(result, result.end()));
 
+            if(st.stop_requested()) break;
+
             if (auto stream_it = result.find(supp_var::STREAM_NAME); stream_it != result.end()) {
                 for (const auto entry : stream_it->second) {
                     try {
                         SensorData data = iot::parser::RedisStreamParser::parse_sensor_data(entry.first, entry.second);
 
-                        // std::cout << line_counter++ << " : " << data.device_id() << '\n';
+                        std::cout << line_counter++ << " : " << data.device_id() << '\n';
 
                         aggregator->add_value(
                             data.device_id(),
                             data.temperature(),
-                            data.timestamp().seconds());
+                            data.timestamp().seconds(),
+                        metrics);
 
-                        alert_manager->check_thresholds(data);
+                        alert_manager->check_thresholds(data, metrics);
 
                         last_id = entry.first;
                     } catch (const iot::parser::StreamParserException &e) {
@@ -245,45 +254,85 @@ void redis_consumer(std::shared_ptr<MetricAggregator> aggregator,
                     }
                 }
             }
+            metrics.message_processed().Increment();
+            auto end = std::chrono::steady_clock::now();
+            metrics.processed_time().Observe(
+                            std::chrono::duration<double>(end-start).count());
+
         } catch (const std::exception &e) {
             std::cerr << "Redis error: " << e.what() << '\n';
+            metrics.parse_error().Increment();
             std::this_thread::sleep_for(1s);
         }
     }
 }
 
-void setup_metrics(){
-    auto registry = std::make_shared<prometheus::Registry>();
-    auto& message_counter = prometheus::BuildCounter()
-        .Name("message_processed_total")
-        .Help("Total processed messages")
-        .Register(*registry)
-        .Add({});
-    
-        auto exporter = std::make_unique<prometheus::Exposer>(supp_var::PROMETHEUS_ADDRESS);
-        exporter->RegisterCollectable(registry);
-}
+class AnalyticsServer{
+public:
+    AnalyticsServer() 
+      : metrics_(supp_var::PROMETHEUS_ADDRESS),
+        aggregator_(std::make_shared<MetricAggregator>()),
+        alert_manager_(std::make_shared<AlertManager>()) {}
+
+    void Run(){
+        setup_signal_handlers();
+        start_redis_consumer();
+        start_grpc_server();
+        wait_for_shutdown();
+        cleanup();
+    }
+
+private:
+    iot::metrics::PrometheusMetrics metrics_;
+    std::unique_ptr<Server> server_;
+    std::shared_ptr<MetricAggregator> aggregator_;
+    std::shared_ptr<AlertManager> alert_manager_;
+    std::jthread redis_thread_;
+
+    void setup_signal_handlers(){
+        std::signal(SIGINT, [](int){shutdown_requested.store(true); });
+        std::signal(SIGTERM, [](int){shutdown_requested.store(true);} );
+    }
+
+    void start_redis_consumer(){
+        redis_thread_ = std::jthread([this](std::stop_token st){
+            redis_consumer(aggregator_, alert_manager_, metrics_, st);
+        });
+    }
+
+    void start_grpc_server(){
+        AnalyticsServiceImpl service(aggregator_,alert_manager_);
+        ServerBuilder builder;
+        builder.AddListeningPort(supp_var::ANALYS_SERV_ADDRESS,grpc::InsecureServerCredentials());
+        builder.RegisterService(&service);
+        server_ = builder.BuildAndStart();
+        std::cout << "Analytics service listened on port " << supp_var::ANALYS_SERV_ADDRESS << '\n';
+    }
+
+    void wait_for_shutdown(){
+        while(!shutdown_requested.load()){
+            std::this_thread::sleep_for(100ms);
+        }
+		std::cout << "Shutdown signal detected. Shutting down Analysis Server gracefully...\n";
+        server_->Shutdown();
+        server_->Wait();
+    }
+
+    void cleanup(){
+        redis_thread_.request_stop();
+        if(redis_thread_.joinable()){
+            redis_thread_.join();
+        }
+    }
+};
 
 int main(){
-    std::cout << "anal service/\n";
-    std::signal(SIGINT, [](int){shutdown_requested.store(true);});
-	std::signal(SIGTERM, [](int){shutdown_requested.store(true);});
+    // Отключаем буферизацию
+    std::ios::sync_with_stdio(false);
+    std::cout.setf(std::ios::unitbuf);
+    std::cerr.setf(std::ios::unitbuf);
 
-    setup_metrics();
-
-    auto aggregator = std::make_shared<MetricAggregator>();
-    auto alert_manager = std::make_shared<AlertManager>();
-
-    std::jthread redis_thread(redis_consumer,aggregator,alert_manager);
-
-    AnalyticsServiceImpl service(aggregator,alert_manager);
-    ServerBuilder builder;
-    builder.AddListeningPort(supp_var::ANALYS_SERV_ADDRESS,grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
-
-    std::unique_ptr<Server> server(builder.BuildAndStart());
-    std::cout << "Analytics service listened on port " << supp_var::ANALYS_SERV_ADDRESS << '\n';
-
-    server->Wait();
+    AnalyticsServer server;
+    server.Run();
     return 0;
 }

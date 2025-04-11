@@ -1,0 +1,9 @@
+    Redis : redis-cli -h localhost -p 6379
+    Edge Service : grpcurl -plaintext localhost:50051 list
+    Analytics Service : grpcurl -plaintext localhost:50052 list
+    Prometheus : http://localhost:9090
+    Grafana : http://localhost:3000  (логин: admin, пароль: admin)
+
+
+//файл конфигурации - тут хранится параметры окружения
+.env

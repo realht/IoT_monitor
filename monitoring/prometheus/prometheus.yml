@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'iot-analytics'
+    static_configs:
+      - targets: ['analytics_service:8081'] # Адрес из supp_var::PROMETHEUS_ADDRESS
+    metrics_path: /metrics

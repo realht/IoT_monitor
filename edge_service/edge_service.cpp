@@ -27,7 +27,10 @@ using iot::v1::Ack;
 using iot::v1::EdgeService;
 
 namespace supp_var{
-	const std::string REDIS_SERV_ADRESS = "tcp://localhost:6379";
+	const std::string REDIS_SERV_ADRESS = []{
+        const char* env = std::getenv("REDIS_HOST");
+        return env ? env : "tcp://localhost:6379";
+    }();
 	const std::string EGDE_SERV_ADDRESS = "0.0.0.0:50051";
 	const std::string STREAM_NAME = "telemetry_stream";
     constexpr size_t ASYNC_INTERVAL_MS = 10;
@@ -268,6 +271,11 @@ void RunServer(){
 }
 
 int main(){
+	// Отключаем буферизацию
+    std::ios::sync_with_stdio(false);
+    std::cout.setf(std::ios::unitbuf);
+    std::cerr.setf(std::ios::unitbuf);
+
 	//регистрируем обработчики сигналов для SIGINT и SIGTERM
 	std::signal(SIGINT, [](int){shutdown_requested.store(true);});
 	std::signal(SIGTERM, [](int){shutdown_requested.store(true);});

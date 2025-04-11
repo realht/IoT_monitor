@@ -1,11 +1,84 @@
 version: '3.8'
+
 services:
   redis:
     image: redis:latest
     container_name: iot_redis
     ports:
       - "6379:6379"
+    networks:
+      - iot-net
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  edge_service:
+    build:
+      context: .
+      dockerfile: ./edge_service/Dockerfile
+    container_name: edge_service
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - iot-net
+    ports:
+      - "50051:50051"
+    env_file:
+      - .env
+
+  analytics_service:
+    build:
+      context: .
+      dockerfile: ./analytics_service/Dockerfile
+    container_name: analytics_service
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - iot-net
+    ports:
+      - "50052:50052"
+      - "8081:8081"
+    env_file:
+      - .env
+
+  prometheus:
+    image: prom/prometheus:v2.47.2
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - iot-net
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-lifecycle'
+
+  grafana:
+    image: grafana/grafana-enterprise:10.1.5
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - iot-net
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+
 volumes:
   redis_data:
+
+networks:
+  iot-net:
+    driver: bridge
