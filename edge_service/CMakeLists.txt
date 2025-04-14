@@ -1,10 +1,13 @@
 # Исполняемый файл
 add_executable(edge_service
+  edge_server.cpp
   edge_service.cpp
 )
 
 # Зависимости
 target_include_directories(edge_service PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/../config
   ${CMAKE_CURRENT_SOURCE_DIR}/../proto
   ${CMAKE_BINARY_DIR}/proto/generated
 )
@@ -18,6 +21,7 @@ target_link_libraries(edge_service PRIVATE
   Threads::Threads
   redis++::redis++_static
   hiredis::hiredis
+  parse
 )
 
 # Явная зависимость от генерации proto

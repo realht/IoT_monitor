@@ -1,10 +1,13 @@
 # Исполняемый файл
 add_executable(analytics_service
+  analytics_server.cpp
   analytics_service.cpp
 )
 
 # Зависимости
 target_include_directories(analytics_service PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/../config
   ${CMAKE_CURRENT_SOURCE_DIR}/../proto
   ${CMAKE_BINARY_DIR}/proto/generated
 )
