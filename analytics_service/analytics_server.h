@@ -41,20 +41,26 @@ extern std::atomic<bool> shutdown_requested;
 
 class MetricAggregator {
 public:
-    struct Metrics{
+    struct MetricData{
         std::deque<std::pair<double,int64_t>> values;
         double sum = 0.0;
         double min = std::numeric_limits<double>::max();
         double max = std::numeric_limits<double>::min();
     };
+    struct Metrics{
+        MetricData temperature;
+        MetricData humidity;
+    };
 
-    void add_value(const std::string& device_id, double value, int64_t timespamp,
-                iot::metrics::PrometheusMetrics& metrics);
+    void add_value(const std::string& device_id, double temp_value, double humidity_value, 
+                    int64_t timespamp, iot::metrics::PrometheusMetrics& metrics);
     std::optional<Metrics> get_metrics(const std::string& device_id) const;
 
 private:
     mutable std::shared_mutex mutex_;
     std::unordered_map<std::string, Metrics> metrics_;
+
+    void update_metric(MetricData& metric, double value, int64_t timespamp);
 };
 
 class AlertManager {

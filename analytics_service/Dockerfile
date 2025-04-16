@@ -23,6 +23,7 @@ COPY ./conanfile.txt .
 COPY ./CMakeLists.txt .
 COPY ./proto ./proto
 COPY ./parse ./parse
+COPY ./config ./config
 COPY ./analytics_service ./analytics_service
 COPY ./edge_service ./edge_service
 

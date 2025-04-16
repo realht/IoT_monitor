@@ -23,8 +23,14 @@ public:
     prometheus::Counter& parse_error() {return *parse_error_;}
     prometheus::Counter& alerts_triggered() {return *alerts_triggered_;}
     prometheus::Histogram& processed_time() {return *processed_time_;}
-    prometheus::Gauge& aggregation_window() {return *aggregation_window_;}
-
+    prometheus::Gauge& temp_aggregation_window() {return *temp_aggregation_window_;}
+    prometheus::Gauge& humid_aggregation_window() {return *humid_aggregation_window_;}
+    prometheus::Gauge& temperature_avg() {return *temperature_avg_;}
+    prometheus::Gauge& temperature_min() {return *temperature_min_;}
+    prometheus::Gauge& temperature_max() {return *temperature_max_;}
+    prometheus::Gauge& humidity_avg() {return *humidity_avg_;}
+    prometheus::Gauge& humidity_min() {return *humidity_min_;}
+    prometheus::Gauge& humidity_max() {return *humidity_max_;}
 
 private:
     prometheus::Exposer exposer_;
@@ -35,7 +41,15 @@ private:
     prometheus::Counter* parse_error_;
     prometheus::Counter* alerts_triggered_;
     prometheus::Histogram* processed_time_;
-    prometheus::Gauge* aggregation_window_;
+    prometheus::Gauge* temp_aggregation_window_;
+    prometheus::Gauge* humid_aggregation_window_;
+    prometheus::Gauge* temperature_avg_;
+    prometheus::Gauge* temperature_min_;
+    prometheus::Gauge* temperature_max_;
+    prometheus::Gauge* humidity_avg_;
+    prometheus::Gauge* humidity_min_;
+    prometheus::Gauge* humidity_max_;
+
 
     void setup_metrics(){
         message_processed_ = &prometheus::BuildCounter()
@@ -63,9 +77,51 @@ private:
             .Register(*registry_)
             .Add({}, bb);
         
-        aggregation_window_ = &prometheus::BuildGauge()
-            .Name("aggregation_windows_size")
-            .Help("Current aggregation window size")
+        temp_aggregation_window_ = &prometheus::BuildGauge()
+            .Name("temp_aggregation_window")
+            .Help("Current temperature aggregation window size")
+            .Register(*registry_)
+            .Add({});
+
+        humid_aggregation_window_ = &prometheus::BuildGauge()
+            .Name("humid_aggregation_window")
+            .Help("Current humidity aggregation window size")
+            .Register(*registry_)
+            .Add({});
+
+        temperature_avg_ = &prometheus::BuildGauge()
+            .Name("temperature_avg")
+            .Help("Average temterature")
+            .Register(*registry_)
+            .Add({});
+
+        temperature_min_ = &prometheus::BuildGauge()
+            .Name("temperature_min")
+            .Help("Min temterature")
+            .Register(*registry_)
+            .Add({});
+
+        temperature_max_ = &prometheus::BuildGauge()
+            .Name("temperature_max")
+            .Help("Max temterature")
+            .Register(*registry_)
+            .Add({});
+
+        humidity_avg_ = &prometheus::BuildGauge()
+            .Name("humidity_avg")
+            .Help("Average hudimity")
+            .Register(*registry_)
+            .Add({});
+
+        humidity_min_ = &prometheus::BuildGauge()
+            .Name("humidity_min")
+            .Help("Min hudimity")
+            .Register(*registry_)
+            .Add({});
+
+        humidity_max_ = &prometheus::BuildGauge()
+            .Name("humidity_max")
+            .Help("Max hudimity")
             .Register(*registry_)
             .Add({});
     }

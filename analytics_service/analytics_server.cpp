@@ -3,22 +3,43 @@
 size_t line_counter=0;
 std::atomic<bool> shutdown_requested{false};
 
-void MetricAggregator::add_value(const std::string& device_id, double value, int64_t timespamp,
-    iot::metrics::PrometheusMetrics& metrics){
+void MetricAggregator::add_value(const std::string& device_id, double temp_value, double humidity_value, 
+                                int64_t timespamp, iot::metrics::PrometheusMetrics& metrics){
     std::unique_lock lock(mutex_);
     auto& data = metrics_[device_id];
-    data.values.emplace_back(value,timespamp);
-    data.sum += value;
 
-    if(value < data.min) data.min = value;
-    if(value > data.max) data.max = value;
+    //update temp and humidity
+    update_metric(data.temperature,temp_value, timespamp);
+    update_metric(data.humidity, humidity_value, timespamp);
 
-    while(!data.values.empty() && 
-    timespamp - data.values.front().second > iot::config::Thresholds::aggregation_window_sec){
-        data.sum -= data.values.front().first;
-        data.values.pop_front();
+    if(!data.temperature.values.empty()){
+        metrics.temperature_avg().Set(data.temperature.sum / data.temperature.values.size());
+        metrics.temperature_min().Set(data.temperature.min);
+        metrics.temperature_max().Set(data.temperature.max);
     }
-    metrics.aggregation_window().Set(data.values.size());
+
+    if(!data.humidity.values.empty()){
+        metrics.humidity_avg().Set(data.humidity.sum / data.humidity.values.size());
+        metrics.humidity_min().Set(data.humidity.min);
+        metrics.humidity_max().Set(data.humidity.max);
+    }
+
+    metrics.temp_aggregation_window().Set(data.temperature.values.size());
+    metrics.humid_aggregation_window().Set(data.humidity.values.size());
+}
+
+void MetricAggregator::update_metric(MetricData& metric, double value, int64_t timespamp){
+    metric.values.emplace_back(value,timespamp);
+    metric.sum += value;
+
+    if(value < metric.min) metric.min = value;
+    if(value > metric.max) metric.max = value;
+
+    while(!metric.values.empty() && 
+    timespamp - metric.values.front().second > iot::config::Thresholds::aggregation_window_sec){
+        metric.sum -= metric.values.front().first;
+        metric.values.pop_front();
+    }
 }
 
 std::optional<MetricAggregator::Metrics> MetricAggregator::get_metrics(const std::string& device_id) const {
@@ -71,9 +92,21 @@ Status AnalyticsServiceImpl::GetRealtimeStats(ServerContext* context,
 
         if(metrics){
             auto* stat = response.mutable_metrics();
-            (*stat)["temperature_avg"] = metrics->sum / metrics->values.size();
-            (*stat)["temperature_min"] = metrics->min;
-            (*stat)["temperature_max"] = metrics->max;
+
+            //temperature
+            if(!metrics->temperature.values.empty()){
+                (*stat)["temperature_avg"] = metrics->temperature.sum / metrics->temperature.values.size();
+                (*stat)["temperature_min"] = metrics->temperature.min;
+                (*stat)["temperature_max"] = metrics->temperature.max;
+            }
+
+            //humidity
+            if(!metrics->humidity.values.empty()){
+                (*stat)["humidity_avg"] = metrics->humidity.sum / metrics->humidity.values.size();
+                (*stat)["humidity_min"] = metrics->humidity.min;
+                (*stat)["humidity_max"] = metrics->humidity.max;
+            }
+
             writer->Write(response);
         }
         std::this_thread::sleep_for(1s);
@@ -96,29 +129,29 @@ Status AnalyticsServiceImpl::SubscribeToAlerts(ServerContext* context,
 }
 
 bool AnalyticsServiceImpl::mathes_subscription(const Alert& alert, const AlertSubscription& sub){
-    // // Проверка device_ids
-    // if (!sub.device_ids().empty() && 
-    // std::find(sub.device_ids().begin(), 
-    //         sub.device_ids().end(),
-    //         alert.device_id()) == sub.device_ids().end()) {
-    // return false;
-    // }
+    // Проверка device_ids
+    if (!sub.device_ids().empty() && 
+    std::find(sub.device_ids().begin(), 
+            sub.device_ids().end(),
+            alert.device_id()) == sub.device_ids().end()) {
+    return false;
+    }
 
-    // // Проверка типов метрик
-    // if (!sub.metric_types().empty() &&
-    //     std::find(sub.metric_types().begin(),
-    //             sub.metric_types().end(),
-    //             alert.metric_type()) == sub.metric_types().end()) {
-    //     return false;
-    // }
+    // Проверка типов метрик
+    if (!sub.metric_types().empty() &&
+        std::find(sub.metric_types().begin(),
+                sub.metric_types().end(),
+                alert.metric_type()) == sub.metric_types().end()) {
+        return false;
+    }
 
-    // // Проверка уровней серьезности
-    // if (!sub.severity_levels().empty() &&
-    //     std::find(sub.severity_levels().begin(),
-    //             sub.severity_levels().end(),
-    //             alert.severity()) == sub.severity_levels().end()) {
-    //     return false;
-    // }
+    // Проверка уровней серьезности
+    if (!sub.severity_levels().empty() &&
+        std::find(sub.severity_levels().begin(),
+                sub.severity_levels().end(),
+                alert.severity()) == sub.severity_levels().end()) {
+        return false;
+    }
 
     return true;
 }
@@ -163,11 +196,13 @@ void AnalyticsServer::redis_consumer(std::shared_ptr<MetricAggregator> aggregato
                     try {
                         SensorData data = iot::parser::RedisStreamParser::parse_sensor_data(entry.first, entry.second);
 
-                        std::cout << line_counter++ << " : " << data.device_id() << '\n';
+                        std::cout << line_counter++ << " : " << data.device_id() << ':' << data.temperature()
+                        << " and hud=" << data.humidity() << '\n';
 
                         aggregator->add_value(
                             data.device_id(),
                             data.temperature(),
+                            data.humidity(),
                             data.timestamp().seconds(),
                             metrics);
 
