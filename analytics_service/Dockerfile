@@ -21,11 +21,12 @@ WORKDIR /app
 # Копирование исходных файлов
 COPY ./conanfile.txt .
 COPY ./CMakeLists.txt .
-COPY ./proto ./proto
-COPY ./parse ./parse
-COPY ./config ./config
 COPY ./analytics_service ./analytics_service
+COPY ./config ./config
 COPY ./edge_service ./edge_service
+COPY ./parse ./parse
+COPY ./prometheus_metrics ./prometheus_metrics
+COPY ./proto ./proto
 
 # Установка зависимостей через Conan
 RUN conan install . --build=missing -s compiler.cppstd=20

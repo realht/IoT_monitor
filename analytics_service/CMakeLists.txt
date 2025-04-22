@@ -24,6 +24,7 @@ target_link_libraries(analytics_service PRIVATE
   hiredis::hiredis
   Threads::Threads
   parse
+  prometheus_metrics
 )
 
 # Явная зависимость от генерации proto

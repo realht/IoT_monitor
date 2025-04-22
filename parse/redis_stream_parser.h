@@ -5,10 +5,6 @@
 #include <stdexcept>
 #include <string>
 
-// #include <unordered_map>
-// #include <vector>
-// #include <optional>
-
 namespace iot::parser {
 
 class StreamParserException : public std::runtime_error{

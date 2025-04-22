@@ -23,6 +23,7 @@ find_package(prometheus-cpp REQUIRED)
 # Поддиректории (важен порядок!)
 add_subdirectory(proto)
 add_subdirectory(parse)
+add_subdirectory(prometheus_metrics)
 add_subdirectory(edge_service)
 add_subdirectory(analytics_service)
 

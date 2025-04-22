@@ -1,0 +1,338 @@
+.
+├── analytics_service
+│   ├── analytics_server.cpp
+│   ├── analytics_server.h
+│   ├── analytics_service.cpp
+│   ├── CMakeLists.txt
+│   └── Dockerfile
+├── build
+│   ├── absl-config.cmake
+│   ├── absl-config-version.cmake
+│   ├── absl-release-x86_64-data.cmake
+│   ├── absl-Target-release.cmake
+│   ├── abslTargets.cmake
+│   ├── analytics_service
+│   │   ├── analytics_service
+│   │   ├── CMakeFiles
+│   │   │   ├── analytics_service.dir
+│   │   │   │   ├── analytics_server.cpp.o
+│   │   │   │   ├── analytics_server.cpp.o.d
+│   │   │   │   ├── analytics_service.cpp.o
+│   │   │   │   ├── analytics_service.cpp.o.d
+│   │   │   │   ├── build.make
+│   │   │   │   ├── cmake_clean.cmake
+│   │   │   │   ├── compiler_depend.internal
+│   │   │   │   ├── compiler_depend.make
+│   │   │   │   ├── compiler_depend.ts
+│   │   │   │   ├── DependInfo.cmake
+│   │   │   │   ├── depend.make
+│   │   │   │   ├── flags.make
+│   │   │   │   ├── link.txt
+│   │   │   │   └── progress.make
+│   │   │   ├── CMakeDirectoryInformation.cmake
+│   │   │   └── progress.marks
+│   │   ├── cmake_install.cmake
+│   │   └── Makefile
+│   ├── BZip2Config.cmake
+│   ├── BZip2ConfigVersion.cmake
+│   ├── BZip2-release-x86_64-data.cmake
+│   ├── BZip2-Target-release.cmake
+│   ├── BZip2Targets.cmake
+│   ├── c-ares-config.cmake
+│   ├── c-ares-config-version.cmake
+│   ├── c-ares-release-x86_64-data.cmake
+│   ├── c-ares-Target-release.cmake
+│   ├── c-aresTargets.cmake
+│   ├── civetweb-config.cmake
+│   ├── civetweb-config-version.cmake
+│   ├── civetweb-release-x86_64-data.cmake
+│   ├── civetweb-Target-release.cmake
+│   ├── civetwebTargets.cmake
+│   ├── CMakeCache.txt
+│   ├── cmakedeps_macros.cmake
+│   ├── CMakeFiles
+│   │   ├── 3.28.3
+│   │   │   ├── CMakeCXXCompiler.cmake
+│   │   │   ├── CMakeDetermineCompilerABI_CXX.bin
+│   │   │   ├── CMakeSystem.cmake
+│   │   │   └── CompilerIdCXX
+│   │   │       ├── a.out
+│   │   │       ├── CMakeCXXCompilerId.cpp
+│   │   │       └── tmp
+│   │   ├── cmake.check_cache
+│   │   ├── CMakeConfigureLog.yaml
+│   │   ├── CMakeDirectoryInformation.cmake
+│   │   ├── CMakeRuleHashes.txt
+│   │   ├── Makefile2
+│   │   ├── Makefile.cmake
+│   │   ├── pkgRedirects
+│   │   ├── progress.marks
+│   │   └── TargetDirectories.txt
+│   ├── cmake_install.cmake
+│   ├── CMakePresets.json
+│   ├── conanbuildenv-release-x86_64.sh
+│   ├── conanbuild.sh
+│   ├── conandeps_legacy.cmake
+│   ├── conanrunenv-release-x86_64.sh
+│   ├── conanrun.sh
+│   ├── conan_toolchain.cmake
+│   ├── CURLConfig.cmake
+│   ├── CURLConfigVersion.cmake
+│   ├── CURL-release-x86_64-data.cmake
+│   ├── CURL-Target-release.cmake
+│   ├── CURLTargets.cmake
+│   ├── deactivate_conanbuild.sh
+│   ├── deactivate_conanrun.sh
+│   ├── edge_service
+│   │   ├── CMakeFiles
+│   │   │   ├── CMakeDirectoryInformation.cmake
+│   │   │   ├── edge_service.dir
+│   │   │   │   ├── build.make
+│   │   │   │   ├── cmake_clean.cmake
+│   │   │   │   ├── compiler_depend.internal
+│   │   │   │   ├── compiler_depend.make
+│   │   │   │   ├── compiler_depend.ts
+│   │   │   │   ├── DependInfo.cmake
+│   │   │   │   ├── depend.make
+│   │   │   │   ├── edge_server.cpp.o
+│   │   │   │   ├── edge_server.cpp.o.d
+│   │   │   │   ├── edge_service.cpp.o
+│   │   │   │   ├── edge_service.cpp.o.d
+│   │   │   │   ├── flags.make
+│   │   │   │   ├── link.txt
+│   │   │   │   └── progress.make
+│   │   │   └── progress.marks
+│   │   ├── cmake_install.cmake
+│   │   ├── edge_service
+│   │   └── Makefile
+│   ├── FindBZip2.cmake
+│   ├── FindCURL.cmake
+│   ├── FindLibLZMA.cmake
+│   ├── FindOpenSSL.cmake
+│   ├── FindProtobuf.cmake
+│   ├── FindZLIB.cmake
+│   ├── gRPCConfig.cmake
+│   ├── gRPCConfigVersion.cmake
+│   ├── gRPC-release-x86_64-data.cmake
+│   ├── gRPC-Target-release.cmake
+│   ├── gRPCTargets.cmake
+│   ├── hiredis-config.cmake
+│   ├── hiredis-config-version.cmake
+│   ├── hiredis-release-x86_64-data.cmake
+│   ├── hiredis-Target-release.cmake
+│   ├── hiredisTargets.cmake
+│   ├── libcap-config.cmake
+│   ├── libcap-config-version.cmake
+│   ├── libcap-release-x86_64-data.cmake
+│   ├── libcap-Target-release.cmake
+│   ├── libcapTargets.cmake
+│   ├── LibLZMAConfig.cmake
+│   ├── LibLZMAConfigVersion.cmake
+│   ├── LibLZMA-release-x86_64-data.cmake
+│   ├── LibLZMA-Target-release.cmake
+│   ├── LibLZMATargets.cmake
+│   ├── libmount-config.cmake
+│   ├── libmount-config-version.cmake
+│   ├── libmount-release-x86_64-data.cmake
+│   ├── libmount-Target-release.cmake
+│   ├── libmountTargets.cmake
+│   ├── libselinux-config.cmake
+│   ├── libselinux-config-version.cmake
+│   ├── libselinux-release-x86_64-data.cmake
+│   ├── libselinux-Target-release.cmake
+│   ├── libselinuxTargets.cmake
+│   ├── libsystemd-config.cmake
+│   ├── libsystemd-config-version.cmake
+│   ├── libsystemd-release-x86_64-data.cmake
+│   ├── libsystemd-Target-release.cmake
+│   ├── libsystemdTargets.cmake
+│   ├── libxcrypt-config.cmake
+│   ├── libxcrypt-config-version.cmake
+│   ├── libxcrypt-release-x86_64-data.cmake
+│   ├── libxcrypt-Target-release.cmake
+│   ├── libxcryptTargets.cmake
+│   ├── lz4-config.cmake
+│   ├── lz4-config-version.cmake
+│   ├── lz4-release-x86_64-data.cmake
+│   ├── lz4-Target-release.cmake
+│   ├── lz4Targets.cmake
+│   ├── Makefile
+│   ├── module-BZip2-release-x86_64-data.cmake
+│   ├── module-BZip2-Target-release.cmake
+│   ├── module-BZip2Targets.cmake
+│   ├── module-CURL-release-x86_64-data.cmake
+│   ├── module-CURL-Target-release.cmake
+│   ├── module-CURLTargets.cmake
+│   ├── module-LibLZMA-release-x86_64-data.cmake
+│   ├── module-LibLZMA-Target-release.cmake
+│   ├── module-LibLZMATargets.cmake
+│   ├── module-OpenSSL-release-x86_64-data.cmake
+│   ├── module-OpenSSL-Target-release.cmake
+│   ├── module-OpenSSLTargets.cmake
+│   ├── module-Protobuf-release-x86_64-data.cmake
+│   ├── module-Protobuf-Target-release.cmake
+│   ├── module-ProtobufTargets.cmake
+│   ├── module-ZLIB-release-x86_64-data.cmake
+│   ├── module-ZLIB-Target-release.cmake
+│   ├── module-ZLIBTargets.cmake
+│   ├── nlohmann_json-config.cmake
+│   ├── nlohmann_json-config-version.cmake
+│   ├── nlohmann_json-release-x86_64-data.cmake
+│   ├── nlohmann_json-Target-release.cmake
+│   ├── nlohmann_jsonTargets.cmake
+│   ├── OpenSSLConfig.cmake
+│   ├── OpenSSLConfigVersion.cmake
+│   ├── OpenSSL-release-x86_64-data.cmake
+│   ├── OpenSSL-Target-release.cmake
+│   ├── OpenSSLTargets.cmake
+│   ├── parse
+│   │   ├── CMakeFiles
+│   │   │   ├── CMakeDirectoryInformation.cmake
+│   │   │   └── progress.marks
+│   │   ├── cmake_install.cmake
+│   │   └── Makefile
+│   ├── PCRE2Config.cmake
+│   ├── PCRE2ConfigVersion.cmake
+│   ├── PCRE2-release-x86_64-data.cmake
+│   ├── PCRE2-Target-release.cmake
+│   ├── PCRE2Targets.cmake
+│   ├── prometheus-cpp-config.cmake
+│   ├── prometheus-cpp-config-version.cmake
+│   ├── prometheus-cpp-release-x86_64-data.cmake
+│   ├── prometheus-cpp-Target-release.cmake
+│   ├── prometheus-cppTargets.cmake
+│   ├── proto
+│   │   ├── CMakeFiles
+│   │   │   ├── CMakeDirectoryInformation.cmake
+│   │   │   ├── generate_proto_files.dir
+│   │   │   │   ├── build.make
+│   │   │   │   ├── cmake_clean.cmake
+│   │   │   │   ├── compiler_depend.make
+│   │   │   │   ├── compiler_depend.ts
+│   │   │   │   ├── DependInfo.cmake
+│   │   │   │   └── progress.make
+│   │   │   ├── progress.marks
+│   │   │   └── proto.dir
+│   │   │       ├── build.make
+│   │   │       ├── cmake_clean.cmake
+│   │   │       ├── compiler_depend.internal
+│   │   │       ├── compiler_depend.make
+│   │   │       ├── compiler_depend.ts
+│   │   │       ├── DependInfo.cmake
+│   │   │       ├── depend.make
+│   │   │       ├── flags.make
+│   │   │       ├── generated
+│   │   │       │   ├── analytics_service.grpc.pb.cc.o
+│   │   │       │   ├── analytics_service.grpc.pb.cc.o.d
+│   │   │       │   ├── analytics_service.pb.cc.o
+│   │   │       │   ├── analytics_service.pb.cc.o.d
+│   │   │       │   ├── common.pb.cc.o
+│   │   │       │   ├── common.pb.cc.o.d
+│   │   │       │   ├── edge_service.grpc.pb.cc.o
+│   │   │       │   ├── edge_service.grpc.pb.cc.o.d
+│   │   │       │   ├── edge_service.pb.cc.o
+│   │   │       │   └── edge_service.pb.cc.o.d
+│   │   │       └── progress.make
+│   │   ├── cmake_install.cmake
+│   │   ├── generated
+│   │   │   ├── analytics_service.grpc.pb.cc
+│   │   │   ├── analytics_service.grpc.pb.h
+│   │   │   ├── analytics_service_mock.grpc.pb.h
+│   │   │   ├── analytics_service.pb.cc
+│   │   │   ├── analytics_service.pb.h
+│   │   │   ├── common.grpc.pb.cc
+│   │   │   ├── common.grpc.pb.h
+│   │   │   ├── common_mock.grpc.pb.h
+│   │   │   ├── common.pb.cc
+│   │   │   ├── common.pb.h
+│   │   │   ├── edge_service.grpc.pb.cc
+│   │   │   ├── edge_service.grpc.pb.h
+│   │   │   ├── edge_service_mock.grpc.pb.h
+│   │   │   ├── edge_service.pb.cc
+│   │   │   └── edge_service.pb.h
+│   │   └── Makefile
+│   ├── protobuf-config.cmake
+│   ├── protobuf-config-version.cmake
+│   ├── protobuf-release-x86_64-data.cmake
+│   ├── protobuf-Target-release.cmake
+│   ├── protobufTargets.cmake
+│   ├── re2-config.cmake
+│   ├── re2-config-version.cmake
+│   ├── re2-release-x86_64-data.cmake
+│   ├── re2-Target-release.cmake
+│   ├── re2Targets.cmake
+│   ├── redis++-config.cmake
+│   ├── redis++-config-version.cmake
+│   ├── redis++-release-x86_64-data.cmake
+│   ├── redis++-Target-release.cmake
+│   ├── redis++Targets.cmake
+│   ├── ZLIBConfig.cmake
+│   ├── ZLIBConfigVersion.cmake
+│   ├── ZLIB-release-x86_64-data.cmake
+│   ├── ZLIB-Target-release.cmake
+│   ├── ZLIBTargets.cmake
+│   ├── zstd-config.cmake
+│   ├── zstd-config-version.cmake
+│   ├── zstd-release-x86_64-data.cmake
+│   ├── zstd-Target-release.cmake
+│   └── zstdTargets.cmake
+├── CMakeLists.txt
+├── CMakeUserPresets.json
+├── conanfile.txt
+├── config
+│   └── config.h
+├── data1.json
+├── docker-compose.yml
+├── edge_service
+│   ├── CMakeLists.txt
+│   ├── Dockerfile
+│   ├── edge_server.cpp
+│   ├── edge_server.h
+│   └── edge_service.cpp
+├── ghz-tests.txt
+├── ghz-tests_v2.txt
+├── ghz-tests_v3.txt
+├── ghz-tests_v4.txt
+├── install.txt
+├── monitoring
+│   ├── grafana
+│   │   ├── dashboards
+│   │   │   ├── default.json
+│   │   │   └── iot-dashboard.json
+│   │   └── provisioning
+│   │       ├── dashboards
+│   │       │   └── dashboard.yaml
+│   │       └── datasources
+│   │           └── prometheus.yaml
+│   └── prometheus
+│       └── prometheus.yml
+├── old_metrics
+├── _other
+│   ├── analy_gemeny.txt
+│   ├── analy_gpt.txt
+│   ├── analy_groc.txt
+│   ├── analytics_service.cpp_i_think_this_can_work
+│   ├── analytics_service.cpp_v2_gem
+│   ├── data1.json
+│   ├── data.json
+│   ├── docker-compose_final.yml
+│   ├── _docker-compose.yml
+│   ├── docker-compose.yml_new
+│   └── grafana_dashboard.json
+├── parse
+│   ├── CMakeLists.txt
+│   ├── prometheus_metrics.h
+│   └── redis_stream_parser.h
+├── proj_info.txt
+├── proto
+│   ├── analytics_service.proto
+│   ├── CMakeLists.txt
+│   ├── common.proto
+│   └── edge_service.proto
+├── req.py
+├── tests-result
+│   └── sync-server.txt
+├── tree.txt
+└── valgrind.txt
+
+35 directories, 301 files

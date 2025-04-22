@@ -1,6 +1,0 @@
-# Запуск 100000 запросов с 100 параллельными соединениями
-ghz --insecure -n 100000 -c 100 \
-    --proto proto/edge_service.proto \
-    --call iot.v1.EdgeService.StreamTelemetry \
-    -d '{"device_id": "test", "temperature": 25}' \
-    localhost:50051

@@ -22,6 +22,8 @@
 #include "redis_stream_parser.h"
 #include "prometheus_metrics.h"
 #include "config.h"
+#include <google/protobuf/util/time_util.h>
+
 
 using namespace std::chrono_literals;
 using grpc::Server;
@@ -38,14 +40,18 @@ using iot::v1::SensorData;
 
 extern size_t line_counter;
 extern std::atomic<bool> shutdown_requested;
+extern const double EPS;
 
 class MetricAggregator {
 public:
     struct MetricData{
         std::deque<std::pair<double,int64_t>> values;
         double sum = 0.0;
+        double sum_squares = 0.0;
         double min = std::numeric_limits<double>::max();
         double max = std::numeric_limits<double>::min();
+
+        double compute_stddev();
     };
     struct Metrics{
         MetricData temperature;
@@ -104,6 +110,7 @@ public:
 private:
     iot::metrics::PrometheusMetrics metrics_;
     std::unique_ptr<Server> server_;
+    std::unique_ptr<AnalyticsServiceImpl> service_;
     std::shared_ptr<MetricAggregator> aggregator_;
     std::shared_ptr<AlertManager> alert_manager_;
     std::jthread redis_thread_;
@@ -117,4 +124,23 @@ private:
     void start_grpc_server();
     void wait_for_shutdown();
     void cleanup();
+
+    void process_entry(
+        const std::pair<std::string, iot::parser::RedisStreamParser::FieldMap>& entry,
+        MetricAggregator& aggregator,
+        AlertManager& alert_manager,
+        iot::metrics::PrometheusMetrics& metrics);
+        
+    void ack_messages(
+        sw::redis::Redis& redis,
+        const std::string& stream,
+        const std::string& group,
+        std::vector<std::string>& ids,
+        iot::metrics::PrometheusMetrics& metrics);
+    
+    void update_metrics(
+        iot::metrics::PrometheusMetrics& metrics,
+        std::chrono::steady_clock::time_point start,
+        size_t precessed_count);
+
 };

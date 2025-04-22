@@ -38,11 +38,23 @@ struct StreamSettings {
     static constexpr auto read_timeout = std::chrono::milliseconds(100);
     static constexpr const char* stream_name = "telemetry_stream";
     static constexpr const char* alerts_stream = "alerts_stream";
+    static constexpr const char* consumer_group = "analytics_group";
+    static constexpr const int pendint_timeout_ms = 5000;
+    static constexpr const int max_retries = 3;
+
+    static inline std::string consumer_name() {
+        static std::string name = [](){
+            char hostname[256] = {0};
+            gethostname(hostname, sizeof(hostname));
+            return std::string(hostname) + "_" + std::to_string(getpid());
+        }();
+        return name;
+    }
 };
 
 struct Thresholds {
-    static constexpr double temperature = 40.0;
-    static constexpr double humidity = 80.0;
+    static constexpr double temperature = 50.0;
+    static constexpr double humidity = 60.0;
     static constexpr size_t aggregation_window_sec = 30;
 };
 

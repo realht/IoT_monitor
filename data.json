@@ -1,0 +1,6 @@
+{
+  "device_id": "sensor_{{randomInt 10 30 }}",
+  "temperature": {{ div (randomInt 200 750) 10 }},
+  "humidity": {{ randomInt 20 90 }},
+  "timestamp": "2025-{{printf "%02d" (randomInt 01 12) }}-{{printf "%02d" (randomInt 01 28) }}T00:00:00Z"
+}

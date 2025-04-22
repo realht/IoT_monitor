@@ -112,7 +112,7 @@ public:
     EdgeServer()
     :   redis_pool_(std::thread::hardware_concurrency()),
         queue_(),
-        service_(queue_) {}
+        service_(std::make_unique<EdgeServiceImpl>(queue_)) {}
         
     void Run();
         
@@ -145,7 +145,8 @@ private:
         
     RedisPool redis_pool_;
     ThreadSafeQueue<SensorData> queue_;
-    EdgeServiceImpl service_;
+    //EdgeServiceImpl service_;
+    std::unique_ptr<EdgeServiceImpl> service_;
     std::unique_ptr<Server> server_;
     std::unique_ptr<ServerCompletionQueue> cq_; 
     std::jthread redis_thread_;

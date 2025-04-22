@@ -2,6 +2,16 @@
 
 size_t line_counter=0;
 std::atomic<bool> shutdown_requested{false};
+const double EPS = 1e-7;
+
+double MetricAggregator::MetricData::compute_stddev(){
+    size_t n = values.size();
+    if(n == 0) return 0;
+    double mean = sum/n;
+    double variance = sum_squares / n - mean*mean;
+    if(variance < 0.0) variance=0.0;
+    return std::sqrt(variance);
+}
 
 void MetricAggregator::add_value(const std::string& device_id, double temp_value, double humidity_value, 
                                 int64_t timespamp, iot::metrics::PrometheusMetrics& metrics){
@@ -12,25 +22,30 @@ void MetricAggregator::add_value(const std::string& device_id, double temp_value
     update_metric(data.temperature,temp_value, timespamp);
     update_metric(data.humidity, humidity_value, timespamp);
 
-    if(!data.temperature.values.empty()){
-        metrics.temperature_avg().Set(data.temperature.sum / data.temperature.values.size());
-        metrics.temperature_min().Set(data.temperature.min);
-        metrics.temperature_max().Set(data.temperature.max);
-    }
+    size_t window_temp  = data.temperature.values.size();
+    size_t window_humid = data.humidity.values.size();
 
-    if(!data.humidity.values.empty()){
-        metrics.humidity_avg().Set(data.humidity.sum / data.humidity.values.size());
-        metrics.humidity_min().Set(data.humidity.min);
-        metrics.humidity_max().Set(data.humidity.max);
-    }
+    double avg_temp     = window_temp ? data.temperature.sum / window_temp : 0.0;
+    double min_temp     = window_temp ? data.temperature.min               : 0.0;
+    double max_temp     = window_temp ? data.temperature.max               : 0.0;
+    double stddev_temp  = window_temp ? data.temperature.compute_stddev()  : 0.0;  
+    
+    double avg_humid    = window_humid ? data.humidity.sum / window_humid : 0.0;
+    double min_humid    = window_humid ? data.humidity.min                : 0.0;
+    double max_humid    = window_humid ? data.humidity.max                : 0.0;
+    double stddev_humid = window_humid ? data.humidity.compute_stddev()   : 0.0;
 
-    metrics.temp_aggregation_window().Set(data.temperature.values.size());
-    metrics.humid_aggregation_window().Set(data.humidity.values.size());
+    metrics.publishMetrics(device_id,
+        avg_temp, min_temp, max_temp, stddev_temp,
+        avg_humid, min_humid, max_humid, stddev_humid,
+        window_temp, window_humid
+    );
 }
 
 void MetricAggregator::update_metric(MetricData& metric, double value, int64_t timespamp){
     metric.values.emplace_back(value,timespamp);
     metric.sum += value;
+    metric.sum_squares += (value * value);
 
     if(value < metric.min) metric.min = value;
     if(value > metric.max) metric.max = value;
@@ -38,6 +53,7 @@ void MetricAggregator::update_metric(MetricData& metric, double value, int64_t t
     while(!metric.values.empty() && 
     timespamp - metric.values.front().second > iot::config::Thresholds::aggregation_window_sec){
         metric.sum -= metric.values.front().first;
+        metric.sum_squares -= (metric.values.front().first * metric.values.front().first);
         metric.values.pop_front();
     }
 }
@@ -86,27 +102,64 @@ std::vector<Alert> AlertManager::get_alerts(){
 
 Status AnalyticsServiceImpl::GetRealtimeStats(ServerContext* context, 
     const StatRequest* request, ServerWriter<StatResponse>* writer) {
+
+        std::cout << "income request: " << 12313 <<'\n';
+        // StatResponse responce;
+        // responce.mutable_metrics()->insert({"status", 1.0});
+        // writer->Write(responce);
+
+    StatResponse response;
     while(!context->IsCancelled() && !shutdown_requested.load()){
-        StatResponse response;
+        
         auto metrics = aggregator_->get_metrics(request->device_id(0));
+        auto type = request->aggregation();
 
         if(metrics){
             auto* stat = response.mutable_metrics();
-
-            //temperature
-            if(!metrics->temperature.values.empty()){
-                (*stat)["temperature_avg"] = metrics->temperature.sum / metrics->temperature.values.size();
-                (*stat)["temperature_min"] = metrics->temperature.min;
-                (*stat)["temperature_max"] = metrics->temperature.max;
+            if(type == iot::v1::StatRequest_AggregationType_AVG){
+                if(!metrics->temperature.values.empty()){
+                    (*stat)["temperature_avg"] = metrics->temperature.sum / metrics->temperature.values.size();
+                }
+                if(!metrics->humidity.values.empty()){
+                    (*stat)["humidity_avg"] = metrics->humidity.sum / metrics->humidity.values.size();
+                }
+            }else if(type == iot::v1::StatRequest_AggregationType_MIN){
+                if(!metrics->temperature.values.empty()){
+                    (*stat)["temperature_min"] = metrics->temperature.min;
+                }
+                if(!metrics->humidity.values.empty()){
+                    (*stat)["humidity_min"] = metrics->humidity.min;
+                }
+            }else if(type == iot::v1::StatRequest_AggregationType_MAX){
+                if(!metrics->temperature.values.empty()){
+                    (*stat)["temperature_max"] = metrics->temperature.max;
+                }    
+                if(!metrics->humidity.values.empty()){
+                    (*stat)["humidity_max"] = metrics->humidity.max;
+                }
+            }else if(type == iot::v1::StatRequest_AggregationType_STDDEV){
+                if(!metrics->temperature.values.empty()){
+                    (*stat)["temperature_stddev"] = metrics->temperature.compute_stddev();
+                }    
+                if(!metrics->humidity.values.empty()){
+                    (*stat)["humidity_stddev"] = metrics->humidity.compute_stddev();
+                }
+            }else{
+                std::string ans = "Error, type not supported";
+                response.mutable_metrics()->insert({ans, -1});
             }
 
-            //humidity
-            if(!metrics->humidity.values.empty()){
-                (*stat)["humidity_avg"] = metrics->humidity.sum / metrics->humidity.values.size();
-                (*stat)["humidity_min"] = metrics->humidity.min;
-                (*stat)["humidity_max"] = metrics->humidity.max;
-            }
+            auto now = std::chrono::system_clock::now();
+            *response.mutable_timestamp() = google::protobuf::util::TimeUtil::TimeTToTimestamp(
+                std::chrono::system_clock::to_time_t(now));
+            writer->Write(response);
+        }else{
+            std::string ans = "Error, device_id: " + request->device_id(0) + " not found";
+            response.mutable_metrics()->insert({ans, -1});
 
+            auto now = std::chrono::system_clock::now();
+            *response.mutable_timestamp() = google::protobuf::util::TimeUtil::TimeTToTimestamp(
+                std::chrono::system_clock::to_time_t(now));
             writer->Write(response);
         }
         std::this_thread::sleep_for(1s);
@@ -158,8 +211,12 @@ bool AnalyticsServiceImpl::mathes_subscription(const Alert& alert, const AlertSu
 
 void AnalyticsServer::Run(){
     setup_signal_handlers();
-    start_redis_consumer();
+
     start_grpc_server();
+
+    std::this_thread::sleep_for(500ms); 
+
+    start_redis_consumer();
     wait_for_shutdown();
     cleanup();
 }
@@ -167,6 +224,10 @@ void AnalyticsServer::Run(){
 void AnalyticsServer::setup_signal_handlers(){
     std::signal(SIGINT, [](int){shutdown_requested.store(true); });
     std::signal(SIGTERM, [](int){shutdown_requested.store(true);} );
+    std::signal(SIGSEGV, [](int) {
+        std::cerr << "SEGFAULT detected!" << std::endl;
+        std::abort();
+    });
 }
 
 void AnalyticsServer::redis_consumer(std::shared_ptr<MetricAggregator> aggregator,
@@ -174,52 +235,60 @@ void AnalyticsServer::redis_consumer(std::shared_ptr<MetricAggregator> aggregato
                                      iot::metrics::PrometheusMetrics &metrics,
                                      std::stop_token st){
     auto redis = std::make_shared<sw::redis::Redis>(iot::config::NetworkingSettings::redis_host());
-    std::string last_id = "0-0";
+
+    std::string stream_name = iot::config::StreamSettings::stream_name;
+    std::string group_name = iot::config::StreamSettings::consumer_group;
+    std::string consumer_name = iot::config::StreamSettings::consumer_name();
+
+
+    try{
+        redis->xgroup_create(stream_name,group_name,"0-0", true);
+    }catch(const sw::redis::Error& e){
+        if(e.what() != std::string{"BUSYGROUP Consumer Group name already exists"}){
+            std::cerr << "Error create group on alaytics server: " << e.what() << '\n';
+            throw;
+        }
+        
+    }
+
+    std::vector<std::string> ids_to_ack;
+    ids_to_ack.reserve(iot::config::StreamSettings::max_batch_size);
 
     while (!st.stop_requested()) {
         try {
             auto start = std::chrono::steady_clock::now();
-
             iot::parser::RedisStreamParser::StreamResult result;
-            std::string stream_name = iot::config::StreamSettings::stream_name;
 
-            redis->xread(stream_name,
-                         last_id,
-                         iot::config::StreamSettings::read_timeout,
-                         iot::config::StreamSettings::max_batch_size,
-                         std::inserter(result, result.end()));
+            redis->xreadgroup(group_name,
+                        consumer_name,
+                        stream_name,
+                        ">",
+                        iot::config::StreamSettings::read_timeout,
+                        iot::config::StreamSettings::max_batch_size,
+                        false, // noask = false (требуем явного ACK)
+                        std::inserter(result, result.end()));
 
             if (st.stop_requested()) break;
 
+            //обработка батча
             if (auto stream_it = result.find(stream_name); stream_it != result.end()) {
                 for (const auto entry : stream_it->second) {
                     try {
-                        SensorData data = iot::parser::RedisStreamParser::parse_sensor_data(entry.first, entry.second);
-
-                        std::cout << line_counter++ << " : " << data.device_id() << ':' << data.temperature()
-                        << " and hud=" << data.humidity() << '\n';
-
-                        aggregator->add_value(
-                            data.device_id(),
-                            data.temperature(),
-                            data.humidity(),
-                            data.timestamp().seconds(),
-                            metrics);
-
-                        alert_manager->check_thresholds(data, metrics);
-
-                        last_id = entry.first;
+                        process_entry(entry,*aggregator,*alert_manager, metrics);
+                        ids_to_ack.push_back(entry.first);
                     } catch (const iot::parser::StreamParserException &e) {
                         std::cerr << "Pasre error: " << e.what() << '\n';
+                        metrics.parse_error().Increment();
                     }
                 }
+                //подтвержднеие обработки
+                ack_messages(*redis,stream_name,group_name,ids_to_ack,metrics);
             }
-            metrics.message_processed().Increment();
-            auto end = std::chrono::steady_clock::now();
-            metrics.processed_time().Observe(
-                std::chrono::duration<double>(end - start).count());
+            update_metrics(metrics,start,result.size());
+            
         } catch (const std::exception &e) {
             std::cerr << "Redis error: " << e.what() << '\n';
+            
             metrics.parse_error().Increment();
             std::this_thread::sleep_for(1s);
         }
@@ -232,14 +301,63 @@ void AnalyticsServer::start_redis_consumer(){
     });
 }
 
+void AnalyticsServer::process_entry(const std::pair<std::string, iot::parser::RedisStreamParser::FieldMap>& entry,
+    MetricAggregator& aggregator, AlertManager& alert_manager, iot::metrics::PrometheusMetrics& metrics){
+
+    SensorData data = iot::parser::RedisStreamParser::parse_sensor_data(entry.first, entry.second);
+
+    std::cout << line_counter++ << " : " << data.device_id() << ": temp = " << data.temperature()
+                        << " and hud=" << data.humidity()  <<'\n';
+
+    aggregator.add_value(
+        data.device_id(),
+        data.temperature(),
+        data.humidity(),
+        data.timestamp().seconds(),
+        metrics);
+
+    alert_manager.check_thresholds(data, metrics);
+}
+
+void AnalyticsServer::ack_messages(sw::redis::Redis& redis, const std::string& stream,
+        const std::string& group, std::vector<std::string>& ids, 
+        iot::metrics::PrometheusMetrics& metrics){
+    if(ids.empty()) return;
+
+    try{
+        redis.xack(stream,group,ids.begin(),ids.end());
+        metrics.message_acked().Increment(ids.size());
+    }catch(const std::exception& e){
+        std::cerr <<"XACK error: " << e.what() << '\n';
+        metrics.ack_error().Increment(ids.size());
+    }
+    ids.clear();
+}
+
+void AnalyticsServer::update_metrics(iot::metrics::PrometheusMetrics& metrics,
+    std::chrono::steady_clock::time_point start, size_t precessed_count){
+        metrics.message_processed().Increment(precessed_count);
+        auto end = std::chrono::steady_clock::now();
+        metrics.processed_time().Observe(
+            std::chrono::duration(end-start).count());
+    }
+
+
 void AnalyticsServer::start_grpc_server(){
-    AnalyticsServiceImpl service(aggregator_,alert_manager_);
+    service_ = std::make_unique<AnalyticsServiceImpl>(aggregator_,alert_manager_);
     ServerBuilder builder;
     std::string server_address = iot::config::NetworkingSettings::analytics_service_address();
     builder.AddListeningPort(server_address,grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
+    builder.RegisterService(service_.get());
     server_ = builder.BuildAndStart();
-    std::cout << "Analytics service listened on port " << server_address << '\n';
+
+    // Критическая проверка
+    if (!server_) {
+        std::cerr << "Failed to start gRPC server!" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    std::cout << "Analytics service listened on port " << server_address << " and name: " << iot::config::StreamSettings::consumer_name() <<'\n';
 }
 
 void AnalyticsServer::wait_for_shutdown(){

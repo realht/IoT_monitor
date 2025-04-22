@@ -78,14 +78,14 @@ void EdgeServer::start_grpc_server() {
     ServerBuilder builder;
     std::string server_address = iot::config::NetworkingSettings::edge_service_address();
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service_);
+    builder.RegisterService(service_.get());
     builder.SetDefaultCompressionAlgorithm(GRPC_COMPRESS_GZIP);
     
     cq_ = builder.AddCompletionQueue();
     server_ = builder.BuildAndStart();
     std::cout << "Edge server listening on port " << server_address << '\n';
     
-    service_.StartPrecessing(cq_.get());
+    service_->StartPrecessing(cq_.get());
     
     grpc_thread_ = std::jthread([this](std::stop_token st) {
         void* tag;

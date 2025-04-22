@@ -1,0 +1,5 @@
+ghz --insecure -n 1 -c 1 \
+    --proto proto/analytics_service.proto \
+    --call iot.v1.AnalyticsService.GetRealtimeStats \
+    -d '{"device_id": ["sensor_24"],  "aggregation": "AVG", "window_seconds": 60}' \
+    localhost:50052
