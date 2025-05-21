@@ -5,6 +5,7 @@
 #include <sw/redis++/redis++.h>
 #include <vector>
 #include <queue>
+#include <deque>
 #include <mutex>
 #include <condition_variable>
 #include <thread>
@@ -38,22 +39,13 @@ class ThreadSafeQueue{
 public:
 	void push(const T& value){
 		std::lock_guard<std::mutex> lock(mutex_);
-		queue_.push(value);
+		queue_.push_back(value);
 		cond_var_.notify_one();
 	}
 
 	//пытается извлечь данные. если очередь пуста блокируется до появления данных
-	bool pop(T& value){
-		std::unique_lock<std::mutex> lock(mutex_);
-		cond_var_.wait(lock, [this]() {return !queue_.empty() || shutdown_;} );
-		
-		//если очередь пуста возвращает пустой объект
-		if(queue_.empty()) return false;
-
-		value = std::move(queue_.front());
-		queue_.pop();
-		return true;
-	}
+	bool pop(T& value);
+    bool pop_bulk(std::vector<T>& values, size_t max_count);
 
 	//сигнализирует о завершении работы очереди
 	void shutdown(){
@@ -63,7 +55,7 @@ public:
 	}
 
 private:
-	std::queue<T> queue_;
+	std::deque<T> queue_;
 	mutable std::mutex mutex_;
 	std::condition_variable cond_var_;
 	bool shutdown_ = false;
@@ -120,14 +112,6 @@ public:
     void Run();
         
 private:
-    // prometheus::Exposer metrics_exposer_{supp_var::EDGE_SERV_ADDRESS};
-    // prometheus::Registry metrics_registry_;
-    // prometheus::Family<prometheus::Counter>& message_processed_counter_ =
-    //     prometheus::BuildCounter()
-    //         .Name("messages_processed_total")
-    //         .Help("Total number of processed messages")
-    //         .Register(metrics_registry_);
-        
     class RedisPool {
     public:
         RedisPool(size_t size) {
@@ -148,11 +132,11 @@ private:
         
     RedisPool redis_pool_;
     ThreadSafeQueue<SensorData> queue_;
-    //EdgeServiceImpl service_;
     std::unique_ptr<EdgeServiceImpl> service_;
     std::unique_ptr<Server> server_;
     std::unique_ptr<ServerCompletionQueue> cq_; 
-    std::jthread redis_thread_;
+    //std::jthread redis_thread_;
+    std::vector<std::jthread> redis_consumers_;
     std::jthread grpc_thread_;
     std::shared_ptr<spdlog::logger> logger_;
         
@@ -161,4 +145,6 @@ private:
     void start_grpc_server();
     void wait_for_shutdown();
     void cleanup();
+    void write_batch_to_redis(const std::vector<SensorData>& batch,
+                            std::shared_ptr<sw::redis::Redis>& redis);
 };

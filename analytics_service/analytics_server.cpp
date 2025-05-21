@@ -253,7 +253,8 @@ void AnalyticsServer::redis_consumer(std::shared_ptr<MetricAggregator> aggregato
         redis->xgroup_create(stream_name,group_name,"0-0", true);
     }catch(const sw::redis::Error& e){
         if(e.what() != std::string{"BUSYGROUP Consumer Group name already exists"}){
-            std::cerr << "Error create group on alaytics server: " << e.what() << '\n';
+            //std::cerr << "Error create group on alaytics server: " << e.what() << '\n';
+            logger_->error("Error create group on alaytics server: {}", e.what());
             throw;
         }
         
@@ -289,7 +290,8 @@ void AnalyticsServer::redis_consumer(std::shared_ptr<MetricAggregator> aggregato
                         batch.push_back(data);
                         ids_to_ack.push_back(entry.first);
                     } catch (const iot::parser::StreamParserException &e) {
-                        std::cerr << "Pasre error: " << e.what() << '\n';
+                        //std::cerr << "Pasre error: " << e.what() << '\n';
+                        logger_->error("Pasre error: ", e.what());
                         metrics.parse_error().Increment();
                     }
                 }
@@ -318,7 +320,8 @@ void AnalyticsServer::redis_consumer(std::shared_ptr<MetricAggregator> aggregato
             update_metrics(metrics,start,result.size());
             
         } catch (const std::exception &e) {
-            std::cerr << "Redis error: " << e.what() << '\n';
+            //std::cerr << "Redis error: " << e.what() << '\n';
+            logger_->error("Redis error: ", e.what());
             metrics.parse_error().Increment();
             std::this_thread::sleep_for(1s);
         }
@@ -358,7 +361,8 @@ void AnalyticsServer::ack_messages(sw::redis::Redis& redis, const std::string& s
         redis.xack(stream,group,ids.begin(),ids.end());
         metrics.message_acked().Increment(ids.size());
     }catch(const std::exception& e){
-        std::cerr <<"XACK error: " << e.what() << '\n';
+        //std::cerr <<"XACK error: " << e.what() << '\n';
+        logger_->error("XACK error: ", e.what());
         metrics.ack_error().Increment(ids.size());
     }
     ids.clear();
@@ -383,7 +387,8 @@ void AnalyticsServer::start_grpc_server(){
 
     // Критическая проверка
     if (!server_) {
-        std::cerr << "Failed to start gRPC server!" << std::endl;
+        //std::cerr << "Failed to start gRPC server!" << std::endl;
+        logger_->error("Failed to start gRPC server!");
         exit(EXIT_FAILURE);
     }
 

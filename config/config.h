@@ -34,7 +34,8 @@ struct NetworkingSettings {
 };
 
 struct StreamSettings {
-    static constexpr size_t max_batch_size = 10;
+    static constexpr size_t max_batch_size = 100;
+    static constexpr auto batch_timeout = std::chrono::milliseconds(10);
     static constexpr auto write_timeout = std::chrono::milliseconds(10);
     static constexpr auto read_timeout = std::chrono::milliseconds(100);
     static constexpr const char* stream_name = "telemetry_stream";
@@ -42,6 +43,7 @@ struct StreamSettings {
     static constexpr const char* consumer_group = "analytics_group";
     static constexpr const int pendint_timeout_ms = 5000;
     static constexpr const int max_retries = 3;
+    static constexpr size_t num_queue_shards = 4;
 
     static inline std::string consumer_name() {
         static std::string name = [](){
