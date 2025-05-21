@@ -4,12 +4,9 @@ services:
   redis:
     image: redis:latest
     container_name: iot_redis
-    ports:
-      - "6379:6379"
-    networks:
-      - iot-net
-    volumes:
-      - redis_data:/data
+    ports: ["6379:6379"]
+    networks: [iot-net]
+    volumes: [redis_data:/data]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -21,114 +18,38 @@ services:
       context: .
       dockerfile: ./edge_service/Dockerfile
     container_name: edge_service
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - iot-net
-    ports:
-      - "50051:50051"
-    env_file:
-      - .env
+    env_file: .env
+    ports: ["50051:50051"]
+    volumes: [./logs:/var/log/iot]
+    depends_on: [redis]
+    networks: [iot-net]
 
   analytics_service:
     build:
       context: .
       dockerfile: ./analytics_service/Dockerfile
     container_name: analytics_service
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - iot-net
-    ports:
-      - "50052:50052"
-      - "8081:8081"
-    env_file:
-      - .env
+    env_file: .env
+    ports: ["50052:50052", "8081:8081"]
+    volumes: [./logs:/var/log/iot]
+    depends_on: [redis]
+    networks: [iot-net]
 
   prometheus:
     image: prom/prometheus:v2.47.2
     container_name: prometheus
-    ports:
-      - "9090:9090"
-    networks:
-      - iot-net
+    ports: ["9090:9090"]
     volumes:
       - ./monitoring/prometheus:/etc/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--web.enable-lifecycle'
-
-version: '3.8'
-
-services:
-  redis:
-    image: redis:latest
-    container_name: iot_redis
-    ports:
-      - "6379:6379"
-    networks:
-      - iot-net
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 3
-
-  edge_service:
-    build:
-      context: .
-      dockerfile: ./edge_service/Dockerfile
-    container_name: edge_service
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - iot-net
-    ports:
-      - "50051:50051"
-    env_file:
-      - .env
-
-  analytics_service:
-    build:
-      context: .
-      dockerfile: ./analytics_service/Dockerfile
-    container_name: analytics_service
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - iot-net
-    ports:
-      - "50052:50052"
-      - "8081:8081"
-    env_file:
-      - .env
-
-  prometheus:
-    image: prom/prometheus:v2.47.2
-    container_name: prometheus
-    ports:
-      - "9090:9090"
-    networks:
-      - iot-net
-    volumes:
-      - ./monitoring/prometheus:/etc/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--web.enable-lifecycle'
+    networks: [iot-net]
 
   grafana:
     image: grafana/grafana-enterprise:10.1.5
     container_name: grafana
-    ports:
-      - "3000:3000"
-    networks:
-      - iot-net
+    ports: ["3000:3000"]
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
@@ -140,6 +61,30 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/opt/grafana/dashboards/default.json
+    networks: [iot-net]
+  
+  loki:
+    image: grafana/loki:2.8.0
+    container_name: loki
+    ports: ["3100:3100"]
+    volumes:
+      - ./monitoring/loki:/etc/loki
+      - ./monitoring/loki/data:/data
+    command:
+      - "-config.file=/etc/loki/loki-config.yaml"
+    networks: [iot-net]
+  
+  promtail:
+    image: grafana/promtail:2.8.0
+    container_name: promtail
+    volumes:
+      - ./logs:/var/log/iot
+      - ./monitoring/promtail:/etc/promtail
+    command:
+      - "-config.file=/etc/promtail/promtail-config.yaml"
+    depends_on:
+      - loki
+    networks: [iot-net]
 
 volumes:
   redis_data:

@@ -20,7 +20,7 @@ public:
         double max_humid,
         double stddev_humid,
         size_t window_size_temp,
-        size_t windows_size_humid
+        size_t window_size_humid
     );
     
 private: 
@@ -50,7 +50,7 @@ private:
    
     void publishGauge(const std::string& deivce_id, double value,
         prometheus::Family<prometheus::Gauge>& family,
-        std::unordered_map<std::string, prometheus::Gauge*> metric_map);
+        std::unordered_map<std::string, prometheus::Gauge*>& metric_map);
 };
 
 }//namespace iot::metrics

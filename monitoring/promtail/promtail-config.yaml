@@ -1,0 +1,28 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: iot
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: iot
+          env: production
+          __path__: /var/log/iot/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^\[(?P<timestamp>\d+-\d+-\d+ \d+:\d+:\d+\.\d+)\] \[(?P<level>\w+)\] \[(?P<service>\w+)\] \[tid:(?P<thread>0x\w+)\] (?P<message>.*)'
+      - labels:
+          level:
+          service:
+          thread:
+      - timestamp:
+          format: "2006-01-02 15:04:05.000"
+          source: timestamp

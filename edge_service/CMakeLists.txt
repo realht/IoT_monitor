@@ -23,6 +23,7 @@ target_link_libraries(edge_service PRIVATE
   hiredis::hiredis
   parse
   prometheus_metrics
+  logger
 )
 
 # Явная зависимость от генерации proto

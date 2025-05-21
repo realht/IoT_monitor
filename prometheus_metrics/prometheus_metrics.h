@@ -22,12 +22,15 @@ public:
 
     prometheus::Counter& message_processed() {return *message_processed_;}
     prometheus::Counter& parse_error() {return *parse_error_;}
-    prometheus::Counter& alerts_triggered() {return *alerts_triggered_;}
+    prometheus::Counter& alerts_triggered_temperature() {return *alerts_triggered_temperature_;}
+    prometheus::Counter& alerts_triggered_humidity() {return *alerts_triggered_humidity_;}
+    prometheus::Gauge& alert_rate() {return *alert_rate_;}
     prometheus::Histogram& processed_time() {return *processed_time_;}
-
+    prometheus::Histogram& end_to_end_lanency() {return *end_to_end_latency_;}
     prometheus::Counter& message_acked() {return *message_acked_;}
     prometheus::Counter& ack_error() {return *ack_error_;}
     prometheus::Counter& claim_errors() {return *claim_error_;}
+    prometheus::Family<prometheus::Counter>& message_processed_per_device() {return *message_processed_per_device_;}
 
     void publishMetrics(
         const std::string& device_id,
@@ -55,12 +58,15 @@ private:
     //указатели на метрики
     prometheus::Counter* message_processed_;
     prometheus::Counter* parse_error_;
-    prometheus::Counter* alerts_triggered_;
+    prometheus::Counter* alerts_triggered_temperature_;
+    prometheus::Counter* alerts_triggered_humidity_;
     prometheus::Histogram* processed_time_;
-
+    prometheus::Histogram* end_to_end_latency_;
+    prometheus::Gauge* alert_rate_;
     prometheus::Counter* message_acked_;
     prometheus::Counter* ack_error_;
     prometheus::Counter* claim_error_;
+    prometheus::Family<prometheus::Counter>* message_processed_per_device_;
 
     void setup_metrics(){
         message_processed_ = &prometheus::BuildCounter()
@@ -74,10 +80,22 @@ private:
             .Help("Total data perse errors")
             .Register(*registry_)
             .Add({});
-        
-        alerts_triggered_ = &prometheus::BuildCounter()
-            .Name("alerts_triggered_total")
-            .Help("Total triggered errors")
+
+        alerts_triggered_temperature_ = &prometheus::BuildCounter()
+            .Name("alerts_triggered_temperature_total")
+            .Help("Total triggered temperature errors")
+            .Register(*registry_)
+            .Add({});
+
+        alerts_triggered_humidity_ = &prometheus::BuildCounter()
+            .Name("alerts_triggered_humidity_total")
+            .Help("Total triggered humidity errors")
+            .Register(*registry_)
+            .Add({});
+
+        alert_rate_ = &prometheus::BuildGauge()
+            .Name("alert_rate")
+            .Help("Rate total message to alert")
             .Register(*registry_)
             .Add({});
 
@@ -85,6 +103,12 @@ private:
         processed_time_ = &prometheus::BuildHistogram()
             .Name("processed_time_seconds")
             .Help("Message processing time distribution")
+            .Register(*registry_)
+            .Add({}, bb);
+
+        end_to_end_latency_ = &prometheus::BuildHistogram()
+            .Name("end_to_end_latency_seconds")
+            .Help("End to end time latency")
             .Register(*registry_)
             .Add({}, bb);
         
@@ -105,6 +129,12 @@ private:
             .Help("Total message claim failures")
             .Register(*registry_)
             .Add({});
+
+        message_processed_per_device_ = &prometheus::BuildCounter()
+            .Name("message_processed_per_device")
+            .Help("Total message processed per device")
+            .Register(*registry_);
+            
     }
 };
 

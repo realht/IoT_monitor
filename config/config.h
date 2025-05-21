@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdlib>
 #include <chrono>
+#include <spdlog/spdlog.h>
 
 namespace iot::config {
 
@@ -56,6 +57,64 @@ struct Thresholds {
     static constexpr double temperature = 50.0;
     static constexpr double humidity = 60.0;
     static constexpr size_t aggregation_window_sec = 30;
+};
+
+struct LogSetting{
+    static std::string log_dir(){
+        const char* env = std::getenv("LOG_DIR");
+        return env ? env : "./logs";
+    }
+
+    static spdlog::level::level_enum log_level(){
+        const char* env = std::getenv("LOG_LEVEL");
+		if (!env) return spdlog::level::info;
+
+        std::string level(env);
+        std::transform(level.begin(), level.end(), level.begin(), ::tolower);
+        
+        if (level == "trace") return spdlog::level::trace;
+        if (level == "debug") return spdlog::level::debug;
+        if (level == "warn") return spdlog::level::warn;
+        if (level == "error") return spdlog::level::err;
+        if (level == "critical") return spdlog::level::critical;
+        return spdlog::level::info;
+    }
+
+    static size_t rotate_size(){
+        const char* env = std::getenv("LOG_ROTATE_SIZE");
+        return env ? std::stoul(env) : 5242880;
+    }
+
+    static int rotate_files(){
+        const char* env = std::getenv("LOG_ROTATE_FILES");
+        return env ? std::stoi(env) : 3;
+    }
+
+    static size_t async_queue_size(){
+        const char* env = std::getenv("LOG_ASYNC_QUEUE_SIZE");
+        return env ? std::stoul(env) : 8196;
+    }
+
+    static int async_threads(){
+        const char* env = std::getenv("LOG_ASYNC_THREADS");
+        return env ? std::stoi(env) : 4;
+    }
+
+    static spdlog::level::level_enum flush_level(){
+        const char* env = std::getenv("LOG_FLUSH_LEVEL");
+		if (!env) return spdlog::level::warn;
+        
+        std::string level(env);
+        std::transform(level.begin(), level.end(), level.begin(), ::tolower);
+        
+        if (level == "trace") return spdlog::level::trace;
+        if (level == "debug") return spdlog::level::debug;
+        if (level == "info") return spdlog::level::info;
+        if (level == "warn") return spdlog::level::warn;
+        if (level == "error") return spdlog::level::err;
+        if (level == "critical") return spdlog::level::critical;
+        return spdlog::level::warn;
+    }
 };
 
 }

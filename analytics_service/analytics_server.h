@@ -12,7 +12,6 @@
 #include <mutex>
 #include <shared_mutex>
 #include <unordered_map>
-#include <chrono>
 #include <csignal>
 #include <optional>
 #include "common.pb.h"
@@ -23,7 +22,7 @@
 #include "prometheus_metrics.h"
 #include "config.h"
 #include <google/protobuf/util/time_util.h>
-
+#include "logger_factory.h"
 
 using namespace std::chrono_literals;
 using grpc::Server;
@@ -58,15 +57,18 @@ public:
         MetricData humidity;
     };
 
+    void add_values(const std::vector<SensorData>& batch, iot::metrics::PrometheusMetrics& metrics);
     void add_value(const std::string& device_id, double temp_value, double humidity_value, 
-                    int64_t timespamp, iot::metrics::PrometheusMetrics& metrics);
+                    int64_t timestamp, iot::metrics::PrometheusMetrics& metrics);
     std::optional<Metrics> get_metrics(const std::string& device_id) const;
 
 private:
     mutable std::shared_mutex mutex_;
     std::unordered_map<std::string, Metrics> metrics_;
 
-    void update_metric(MetricData& metric, double value, int64_t timespamp);
+    void update_metric(MetricData& metric, double value, int64_t timestamp);
+    void update_metrics_for_device(const std::string& device_id, double temp_value, 
+        double humidity_value, int64_t timestamp, iot::metrics::PrometheusMetrics& metrics);
 };
 
 class AlertManager {
@@ -92,7 +94,7 @@ public:
                     ServerWriter<Alert>* writer) override;
 
 private:
-    bool mathes_subscription(const Alert& alert, const AlertSubscription& sub);
+    bool matches_subscription(const Alert& alert, const AlertSubscription& sub);
 
     std::shared_ptr<MetricAggregator> aggregator_;
     std::shared_ptr<AlertManager> alert_manager_;
@@ -103,7 +105,8 @@ public:
     AnalyticsServer() 
       : metrics_(iot::config::NetworkingSettings::prometheus_address()),
         aggregator_(std::make_shared<MetricAggregator>()),
-        alert_manager_(std::make_shared<AlertManager>()) {}
+        alert_manager_(std::make_shared<AlertManager>()),
+        logger_(iot::logging::LoggerFactory::create_service_logger("analytics_server")) {}
 
     void Run();
 
@@ -114,12 +117,13 @@ private:
     std::shared_ptr<MetricAggregator> aggregator_;
     std::shared_ptr<AlertManager> alert_manager_;
     std::jthread redis_thread_;
+    std::shared_ptr<spdlog::logger> logger_;
 
     void setup_signal_handlers();
     void redis_consumer(std::shared_ptr<MetricAggregator> aggregator,
-        std::shared_ptr<AlertManager> alert_manager,
-        iot::metrics::PrometheusMetrics& metrics,
-        std::stop_token st);
+                        std::shared_ptr<AlertManager> alert_manager,
+                        iot::metrics::PrometheusMetrics& metrics,
+                        std::stop_token st);
     void start_redis_consumer();
     void start_grpc_server();
     void wait_for_shutdown();

@@ -46,7 +46,7 @@ MetricPublisher::MetricPublisher(std::shared_ptr<prometheus::Registry> registry)
 
 void MetricPublisher::publishGauge(const std::string& deivce_id, double value,
     prometheus::Family<prometheus::Gauge>& family,
-    std::unordered_map<std::string, prometheus::Gauge*> metric_map){
+    std::unordered_map<std::string, prometheus::Gauge*>& metric_map){
     auto it = metric_map.find(deivce_id);
     if(it == metric_map.end()){
         auto& gauge = family.Add({{"device_id", deivce_id}});

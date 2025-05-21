@@ -19,11 +19,13 @@ find_package(Threads REQUIRED)
 find_package(redis++ REQUIRED)
 find_package(hiredis REQUIRED)
 find_package(prometheus-cpp REQUIRED)
+find_package(spdlog REQUIRED)
 
 # Поддиректории (важен порядок!)
 add_subdirectory(proto)
 add_subdirectory(parse)
 add_subdirectory(prometheus_metrics)
+add_subdirectory(logger_factory)
 add_subdirectory(edge_service)
 add_subdirectory(analytics_service)
 

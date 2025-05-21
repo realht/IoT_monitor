@@ -15,6 +15,8 @@
 #include <sys/resource.h>
 #include "prometheus_metrics.h"
 #include "config.h"
+#include "logger_factory.h"
+
 
 using namespace std::chrono_literals;
 using grpc::Server;
@@ -112,7 +114,8 @@ public:
     EdgeServer()
     :   redis_pool_(std::thread::hardware_concurrency()),
         queue_(),
-        service_(std::make_unique<EdgeServiceImpl>(queue_)) {}
+        service_(std::make_unique<EdgeServiceImpl>(queue_)),
+        logger_(iot::logging::LoggerFactory::create_service_logger("edge_server")) {}
         
     void Run();
         
@@ -151,6 +154,7 @@ private:
     std::unique_ptr<ServerCompletionQueue> cq_; 
     std::jthread redis_thread_;
     std::jthread grpc_thread_;
+    std::shared_ptr<spdlog::logger> logger_;
         
     void setup_signal_handlers();
     void start_redis_consumer();     

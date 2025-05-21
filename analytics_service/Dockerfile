@@ -24,6 +24,7 @@ COPY ./CMakeLists.txt .
 COPY ./analytics_service ./analytics_service
 COPY ./config ./config
 COPY ./edge_service ./edge_service
+COPY ./logger_factory ./logger_factory
 COPY ./parse ./parse
 COPY ./prometheus_metrics ./prometheus_metrics
 COPY ./proto ./proto

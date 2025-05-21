@@ -25,6 +25,7 @@ target_link_libraries(analytics_service PRIVATE
   Threads::Threads
   parse
   prometheus_metrics
+  logger
 )
 
 # Явная зависимость от генерации proto

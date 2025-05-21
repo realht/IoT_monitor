@@ -84,6 +84,7 @@ void EdgeServer::start_grpc_server() {
     cq_ = builder.AddCompletionQueue();
     server_ = builder.BuildAndStart();
     std::cout << "Edge server listening on port " << server_address << '\n';
+    logger_->info("Edge server initialized");
     
     service_->StartPrecessing(cq_.get());
     
