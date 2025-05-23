@@ -45,7 +45,8 @@ public:
 
 	//пытается извлечь данные. если очередь пуста блокируется до появления данных
 	bool pop(T& value);
-    bool pop_bulk(std::vector<T>& values, size_t max_count);
+    bool pop_bulk(std::vector<T>& values, size_t max_count,
+                std::chrono::milliseconds tiomeout);
 
 	//сигнализирует о завершении работы очереди
 	void shutdown(){
@@ -63,12 +64,14 @@ private:
 
 class EdgeServiceImpl final : public EdgeService::AsyncService{
 public:
-    explicit EdgeServiceImpl(ThreadSafeQueue<SensorData>& queue)
-    : queue_(queue){}
+    explicit EdgeServiceImpl(std::vector<std::unique_ptr<ThreadSafeQueue<SensorData>>>& queues)
+    : queues_(queues){}
     
     ~EdgeServiceImpl(){
         //сигнал рабочим потокам завершить работу
-        queue_.shutdown();
+        for(auto& q : queues_) {
+            q->shutdown();
+        }
     }
     
     void StartPrecessing(ServerCompletionQueue* cq){
@@ -97,7 +100,7 @@ private:
             CallStatus status_;
     };
     
-    ThreadSafeQueue<SensorData>& queue_;
+    std::vector<std::unique_ptr<ThreadSafeQueue<SensorData>>>& queues_;
 };
 
 
@@ -105,9 +108,14 @@ class EdgeServer {
 public:
     EdgeServer()
     :   redis_pool_(std::thread::hardware_concurrency()),
-        queue_(),
-        service_(std::make_unique<EdgeServiceImpl>(queue_)),
-        logger_(iot::logging::LoggerFactory::create_service_logger("edge_server")) {}
+        logger_(iot::logging::LoggerFactory::create_service_logger("edge_server")) {
+            size_t num_shards = iot::config::StreamSettings::num_queue_shards;
+            queues_.reserve(num_shards);
+            for(size_t i =0;i<num_shards;++i){
+                queues_.emplace_back(std::make_unique<ThreadSafeQueue<SensorData>>());
+            }
+            service_ = std::make_unique<EdgeServiceImpl>(queues_);
+        }
         
     void Run();
         
@@ -131,13 +139,12 @@ private:
     };
         
     RedisPool redis_pool_;
-    ThreadSafeQueue<SensorData> queue_;
+    std::vector<std::unique_ptr<ThreadSafeQueue<SensorData>>> queues_;
     std::unique_ptr<EdgeServiceImpl> service_;
     std::unique_ptr<Server> server_;
-    std::unique_ptr<ServerCompletionQueue> cq_; 
-    //std::jthread redis_thread_;
+    std::vector<std::unique_ptr<grpc::ServerCompletionQueue>> cqs_;
     std::vector<std::jthread> redis_consumers_;
-    std::jthread grpc_thread_;
+    std::vector<std::jthread> grpc_threads_;
     std::shared_ptr<spdlog::logger> logger_;
         
     void setup_signal_handlers();
@@ -147,4 +154,5 @@ private:
     void cleanup();
     void write_batch_to_redis(const std::vector<SensorData>& batch,
                             std::shared_ptr<sw::redis::Redis>& redis);
+    size_t get_get_shrd_index(const std::string& key);
 };

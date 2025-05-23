@@ -16,11 +16,16 @@ bool ThreadSafeQueue<T>::pop(T& value){
 	}
 
 template <typename T>
-bool ThreadSafeQueue<T>::pop_bulk(std::vector<T>& values, size_t max_count){
+bool ThreadSafeQueue<T>::pop_bulk(std::vector<T>& values, size_t max_count,
+                                std::chrono::milliseconds timeout){
     std::unique_lock<std::mutex> lock(mutex_);
-    cond_var_.wait(lock, [this]() {return !queue_.empty() || shutdown_;});
+    auto predicate = [this] {return !queue_.empty() || shutdown_;};
 
-    if(queue_.empty()) return false;
+    if(!cond_var_.wait_for(lock,timeout, predicate)){
+        return false;
+    }
+
+    if(queue_.empty() || shutdown_)  return false;
  
     auto elements_to_take = std::min(max_count,queue_.size());
     auto end_it = std::next(queue_.begin(),elements_to_take);
@@ -30,6 +35,7 @@ bool ThreadSafeQueue<T>::pop_bulk(std::vector<T>& values, size_t max_count){
                 std::make_move_iterator(queue_.begin()),
                 std::make_move_iterator(queue_.begin() + elements_to_take));
     queue_.erase(queue_.begin(),end_it);
+
     return true;
 }
 
@@ -57,7 +63,9 @@ void EdgeServiceImpl::CallData::Proceed(bool ok) {
             return;
         } 
         // Данные прочитаны, отправляем в очередь
-        service_->queue_.push(request_);
+        size_t shard = std::hash<std::string>{}(request_.device_id()) % service_->queues_.size();
+        service_->queues_[shard]->push(request_);
+
         // Продолжаем читать следующее сообщение
         responder_.Read(&request_, this);
     } else {
@@ -83,32 +91,33 @@ void EdgeServer::setup_signal_handlers() {
 }
 
 void EdgeServer::start_redis_consumer() {
-    size_t num_consumers = iot::config::StreamSettings::num_queue_shards;
+    const size_t num_consumers = iot::config::StreamSettings::num_queue_shards;
+    const auto batch_timeout = iot::config::StreamSettings::batch_timeout;
+    const auto batch_size = iot::config::StreamSettings::max_batch_size;
 
-    for(size_t i = 0;i < num_consumers;++i){
-        redis_consumers_.emplace_back([this](std::stop_token st){
+    redis_consumers_.reserve(num_consumers);
+    for(size_t i = 0; i < num_consumers; ++i){
+        redis_consumers_.emplace_back([this, i, batch_timeout, batch_size](std::stop_token st){
             auto redis = redis_pool_.get();
-            auto batch_size = iot::config::StreamSettings::max_batch_size;
-            auto batch_timeout = iot::config::StreamSettings::batch_timeout;
+            auto& queue = *queues_[i];
             std::vector<SensorData> batch;
             batch.reserve(batch_size);
             auto last_flush = std::chrono::steady_clock::now();
 
             while (!st.stop_requested()) {
                 try {
-                    //SensorData data;
                     //извлекаем пачку данных
                     std::vector<SensorData> temp_batch;
-                    if(queue_.pop_bulk(temp_batch,batch_size)){
+                    if(queue.pop_bulk(temp_batch,batch_size, batch_timeout)){
                         batch.insert(batch.end(),
-                        std::make_move_iterator(temp_batch.begin()),
-                        std::make_move_iterator(temp_batch.end()));
+                                    std::make_move_iterator(temp_batch.begin()),
+                                    std::make_move_iterator(temp_batch.end()));
                     }
 
                     //проверяем условия отправки
                     auto now = std::chrono::steady_clock::now();
                     if ( batch.size() >= batch_size ||
-                        (batch.size() > 0 && (now - last_flush) > batch_timeout) ){
+                        (!batch.empty() && (now - last_flush) > batch_timeout) ){
                         write_batch_to_redis(batch,redis);
                         batch.clear();
                         last_flush = now;
@@ -159,40 +168,74 @@ void EdgeServer::write_batch_to_redis(const std::vector<SensorData>& batch,
 void EdgeServer::start_grpc_server() {
     ServerBuilder builder;
     std::string server_address = iot::config::NetworkingSettings::edge_service_address();
+    //const size_t num_cqs = std::thread::hardware_concurrency();
+
+    //настройка производительности
+    // builder.SetSyncServerOption(ServerBuilder::SyncServerOption::MAX_POLLERS, num_cqs);
+    // builder.AddChannelArgument(GRPC_ARG_ALLOW_REUSEPORT,1);
+
+    builder.SetDefaultCompressionAlgorithm(GRPC_COMPRESS_GZIP);
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
     builder.RegisterService(service_.get());
-    builder.SetDefaultCompressionAlgorithm(GRPC_COMPRESS_GZIP);
+
+    // for(size_t i=0;i<num_cqs;++i){
+    //     cqs_.emplace_back(builder.AddCompletionQueue());
+    // }
     
-    cq_ = builder.AddCompletionQueue();
+    const size_t num_threads = std::min(4u, std::thread::hardware_concurrency());
+    auto cq = builder.AddCompletionQueue();
+    cqs_.emplace_back(std::move(cq));
+
     server_ = builder.BuildAndStart();
-    std::cout << "Edge server listening on port " << server_address << '\n';
+    std::cout << "Edge server listening on port " << server_address << "for core: " << num_threads << '\n';
     logger_->info("Edge server initialized on port {}", server_address);
-    
-    service_->StartPrecessing(cq_.get());
-    
-    grpc_thread_ = std::jthread([this](std::stop_token st) {
-        void* tag;
-        bool ok;
-        constexpr auto poll_interval = iot::config::StreamSettings::write_timeout;
-    
-        while (!st.stop_requested()) {
-            auto deadline = std::chrono::system_clock::now() + poll_interval;
-            auto timeout = std::chrono::duration_cast<std::chrono::milliseconds>(
-                deadline - std::chrono::system_clock::now());
-    
-            CompletionQueue::NextStatus status = cq_->AsyncNext(
-                &tag, &ok, gpr_time_add(
-                    gpr_now(GPR_CLOCK_MONOTONIC),
-                    gpr_time_from_millis(timeout.count(), GPR_TIMESPAN)));
-    
-            if (status == grpc::CompletionQueue::GOT_EVENT) {
-                if (tag) static_cast<EdgeServiceImpl::CallData*>(tag)->Proceed(ok);
-            } else if (status == grpc::CompletionQueue::SHUTDOWN) {
-                break;
+
+
+    for(size_t i = 0; i < num_threads; ++i){
+
+        //для каждой cq будет одно прослушивание
+        //service_->StartPrecessing(cqs_[i].get());
+
+        grpc_threads_.emplace_back([this, cq = cqs_.front().get()](std::stop_token st){
+
+            // //Привязка с CPU
+            // cpu_set_t cpuset;
+            // CPU_ZERO(&cpuset);
+            // CPU_SET(i % std::thread::hardware_concurrency(), &cpuset);
+            // pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+
+            //Запуск обработчиков
+            for(size_t i =0;i<2;++i){
+                service_->StartPrecessing(cq);
             }
-        }
-        cq_->Shutdown();
-    });
+
+            void* tag;
+            bool ok;
+            while (!st.stop_requested()){
+                const auto deadline = std::chrono::system_clock::now() + 
+                                        iot::config::StreamSettings::write_timeout;
+                auto status = cq->AsyncNext(&tag, &ok,deadline);
+
+                switch(status){
+                    case grpc::CompletionQueue::GOT_EVENT:
+                        if(tag != nullptr){
+                            auto* call_data = static_cast<EdgeServiceImpl::CallData*>(tag);
+                            call_data->Proceed(ok);
+                        }else{
+                            logger_->error("Null tag received in GOT_EVENT");
+                        }
+                        break;
+                    case grpc::CompletionQueue::SHUTDOWN:
+                        logger_->info("CompletionQueue shutdown initiated");
+                        return;
+                    default:
+                        //logger_->warn("Unexpected CompletionQueue status^ {}", static_cast<int>(status));
+                        break;
+                }
+            }
+            logger_->debug("gRPC processing thread exiting");
+        });
+    }
 }
 
 void EdgeServer::wait_for_shutdown() {
@@ -200,12 +243,21 @@ void EdgeServer::wait_for_shutdown() {
         std::this_thread::sleep_for(100ms);
     }
     std::cout << "Shutdown signal detected. Shutting down EdgeServer gracefully...\n";
+    logger_->info("Shutdown signal detected. Shutting down EdgeServer gracefully...");
     server_->Shutdown();
     server_->Wait();
 }
 
+size_t EdgeServer::get_get_shrd_index(const std::string& key){
+    return std::hash<std::string>{}(key) % queues_.size();
+}
+
 void EdgeServer::cleanup() {
-    queue_.shutdown();
+    //queue_.shutdown();
+    for(auto& queue : queues_){
+        queue->shutdown();
+    }
+    queues_.clear();
 
     for(auto& redis_thread : redis_consumers_){
         if (redis_thread.joinable()) {
@@ -213,9 +265,19 @@ void EdgeServer::cleanup() {
             redis_thread.join();
         }
     }
+    redis_consumers_.clear();
     
-    if (grpc_thread_.joinable()) {
-        grpc_thread_.request_stop();
-        grpc_thread_.join();
+    for(auto& grpc_thread : grpc_threads_){
+        if (grpc_thread.joinable()) {
+            grpc_thread.request_stop();
+            grpc_thread.join();
+        }
     }
+    grpc_threads_.clear();
+
+    for(auto& cq : cqs_){
+        cq->Shutdown();
+    }
+    cqs_.clear();
+    
 }
