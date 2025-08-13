@@ -1,4 +1,4 @@
- ghz --insecure  --duration 15m --rps 150 -c 10 --proto proto/edge_service.proto --call iot.v1.EdgeService.StreamTelemetry --data-file data.json localhost:50051
+ghz --insecure  --duration 15m --rps 150 -c 10 --proto proto/edge_service.proto --call iot.v1.EdgeService.StreamTelemetry --data-file data.json localhost:50051
 
 ghz --insecure  --duration 30s --rps 150 -c 10 --proto proto/edge_service.proto --call iot.v1.EdgeService.StreamTelemetry --data-file data.json localhost:50051
 

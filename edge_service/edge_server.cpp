@@ -52,7 +52,7 @@ void EdgeServiceImpl::CallData::Proceed(bool ok) {
         new CallData(service_, cq_);
         status_ = READING;
         responder_.Read(&request_, this);
-        ///std::cout << "data processed\n";				
+			
     } else if (status_ == READING) {
         if (!ok) {
             // Клиент завершил передачу, завершаем поток
@@ -124,7 +124,6 @@ void EdgeServer::start_redis_consumer() {
                     }
                     std::this_thread::sleep_for(1ms);
                 } catch (const std::exception& e) {
-                    std::cerr << "Error writing to Redis: " << e.what() << '\n';
                     logger_->critical("Error writing to Redis: {}", e.what());
                     std::this_thread::sleep_for(100ms);
                 }
@@ -134,7 +133,6 @@ void EdgeServer::start_redis_consumer() {
                 try{
                     write_batch_to_redis(batch,redis);
                 }catch(const std::exception& e){
-                    std::cerr << "Error writing to Redis: " << e.what() << '\n';
                     logger_->critical("Error writing to Redis: {}", e.what());
                     std::this_thread::sleep_for(100ms);
                 }
@@ -168,20 +166,11 @@ void EdgeServer::write_batch_to_redis(const std::vector<SensorData>& batch,
 void EdgeServer::start_grpc_server() {
     ServerBuilder builder;
     std::string server_address = iot::config::NetworkingSettings::edge_service_address();
-    //const size_t num_cqs = std::thread::hardware_concurrency();
-
-    //настройка производительности
-    // builder.SetSyncServerOption(ServerBuilder::SyncServerOption::MAX_POLLERS, num_cqs);
-    // builder.AddChannelArgument(GRPC_ARG_ALLOW_REUSEPORT,1);
 
     builder.SetDefaultCompressionAlgorithm(GRPC_COMPRESS_GZIP);
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
     builder.RegisterService(service_.get());
-
-    // for(size_t i=0;i<num_cqs;++i){
-    //     cqs_.emplace_back(builder.AddCompletionQueue());
-    // }
-    
+ 
     const size_t num_threads = std::min(4u, std::thread::hardware_concurrency());
     auto cq = builder.AddCompletionQueue();
     cqs_.emplace_back(std::move(cq));
@@ -193,16 +182,7 @@ void EdgeServer::start_grpc_server() {
 
     for(size_t i = 0; i < num_threads; ++i){
 
-        //для каждой cq будет одно прослушивание
-        //service_->StartPrecessing(cqs_[i].get());
-
         grpc_threads_.emplace_back([this, cq = cqs_.front().get()](std::stop_token st){
-
-            // //Привязка с CPU
-            // cpu_set_t cpuset;
-            // CPU_ZERO(&cpuset);
-            // CPU_SET(i % std::thread::hardware_concurrency(), &cpuset);
-            // pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
 
             //Запуск обработчиков
             for(size_t i =0;i<2;++i){
@@ -229,7 +209,7 @@ void EdgeServer::start_grpc_server() {
                         logger_->info("CompletionQueue shutdown initiated");
                         return;
                     default:
-                        //logger_->warn("Unexpected CompletionQueue status^ {}", static_cast<int>(status));
+                        logger_->warn("Unexpected CompletionQueue status {}", static_cast<int>(status));
                         break;
                 }
             }
@@ -253,7 +233,7 @@ size_t EdgeServer::get_get_shrd_index(const std::string& key){
 }
 
 void EdgeServer::cleanup() {
-    //queue_.shutdown();
+
     for(auto& queue : queues_){
         queue->shutdown();
     }

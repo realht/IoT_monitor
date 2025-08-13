@@ -2,3 +2,8 @@
 .git
 build/
 *.swp
+tree.txt
+tests-result/
+_other/
+perf_test_data/
+
