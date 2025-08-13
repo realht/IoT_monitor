@@ -46,7 +46,7 @@ public:
 	//пытается извлечь данные. если очередь пуста блокируется до появления данных
 	bool pop(T& value);
     bool pop_bulk(std::vector<T>& values, size_t max_count,
-                std::chrono::milliseconds tiomeout);
+                std::chrono::milliseconds timeout);
 
 	//сигнализирует о завершении работы очереди
 	void shutdown(){
@@ -74,7 +74,7 @@ public:
         }
     }
     
-    void StartPrecessing(ServerCompletionQueue* cq){
+    void StartProcessing(ServerCompletionQueue* cq){
         new CallData(this, cq);
     }   
         
@@ -154,5 +154,5 @@ private:
     void cleanup();
     void write_batch_to_redis(const std::vector<SensorData>& batch,
                             std::shared_ptr<sw::redis::Redis>& redis);
-    size_t get_get_shrd_index(const std::string& key);
+    size_t get_shred_index(const std::string& key);
 };

@@ -26,7 +26,7 @@ public:
     prometheus::Counter& alerts_triggered_humidity() {return *alerts_triggered_humidity_;}
     prometheus::Gauge& alert_rate() {return *alert_rate_;}
     prometheus::Histogram& processed_time() {return *processed_time_;}
-    prometheus::Histogram& end_to_end_lanency() {return *end_to_end_latency_;}
+    prometheus::Histogram& end_to_end_latency() {return *end_to_end_latency_;}
     prometheus::Counter& message_acked() {return *message_acked_;}
     prometheus::Counter& ack_error() {return *ack_error_;}
     prometheus::Counter& claim_errors() {return *claim_error_;}

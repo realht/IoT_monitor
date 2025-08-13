@@ -2,6 +2,7 @@ _other/
 build/
 tests-result/
 .vscode/
+tree.txt
 CMakeCache.txt
 CMakeFiles/
 install.txt

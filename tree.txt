@@ -5,7 +5,6 @@
 │   ├── analytics_service.cpp
 │   ├── CMakeLists.txt
 │   └── Dockerfile
-├── board.txt
 ├── build
 │   ├── absl-config.cmake
 │   ├── absl-config-version.cmake
@@ -319,8 +318,6 @@
 ├── conanfile.txt
 ├── config
 │   └── config.h
-├── data.json
-├── data_low_time.json
 ├── docker-compose.yml
 ├── edge_service
 │   ├── CMakeLists.txt
@@ -328,10 +325,6 @@
 │   ├── edge_server.cpp
 │   ├── edge_server.h
 │   └── edge_service.cpp
-├── ghz-tests-analytics.txt
-├── ghz-tests_v2.txt
-├── ghz-tests_v4.txt
-├── install.txt
 ├── logger_factory
 │   ├── CMakeLists.txt
 │   └── logger_factory.h
@@ -371,19 +364,27 @@
 │   ├── analy_groc.txt
 │   ├── analytics_service.cpp_i_think_this_can_work
 │   ├── analytics_service.cpp_v2_gem
+│   ├── board.txt
 │   ├── data1.json
 │   ├── data.json
 │   ├── docker-compose_final.yml
 │   ├── _docker-compose.yml
 │   ├── docker-compose.yml_new
+│   ├── ghz-tests-analytics.txt
 │   ├── ghz-tests.txt
 │   ├── ghz-tests_v2.txt
 │   ├── ghz-tests_v3.txt
 │   ├── grafana_dashboard.json
+│   ├── install.txt
 │   └── valgrind.txt
 ├── parse
 │   ├── CMakeLists.txt
 │   └── redis_stream_parser.h
+├── perf_test_data
+│   ├── data.json
+│   ├── data_low_time.json
+│   ├── ghz-tests_v2.txt
+│   └── ghz-tests_v4.txt
 ├── proj_info.txt
 ├── prometheus_metrics
 │   ├── CMakeLists.txt
@@ -399,4 +400,4 @@
 │   └── sync-server.txt
 └── tree.txt
 
-55 directories, 345 files
+56 directories, 345 files

@@ -288,7 +288,7 @@ void AnalyticsServer::redis_consumer(std::shared_ptr<MetricAggregator> aggregato
                         ids_to_ack.push_back(entry.first);
                     } catch (const iot::parser::StreamParserException &e) {
                         //std::cerr << "Pasre error: " << e.what() << '\n';
-                        logger_->error("Pasre error: ", e.what());
+                        logger_->error("Pasre error: {}", e.what());
                         metrics.parse_error().Increment();
                     }
                 }
@@ -302,7 +302,7 @@ void AnalyticsServer::redis_consumer(std::shared_ptr<MetricAggregator> aggregato
                         auto sensor_time = google::protobuf::util::TimeUtil::TimestampToTimeT(data.timestamp());
                         auto latency = std::chrono::duration_cast<std::chrono::milliseconds>(
                             now - std::chrono::system_clock::from_time_t(sensor_time)).count() / 1000.0;
-                        metrics.end_to_end_lanency().Observe(latency);
+                        metrics.end_to_end_latency().Observe(latency);
 
                         //инкремент счетчика сообщений для устройства
                         metrics.message_processed_per_device().Add({{"device_id", data.device_id()}}).Increment();
@@ -317,7 +317,7 @@ void AnalyticsServer::redis_consumer(std::shared_ptr<MetricAggregator> aggregato
             update_metrics(metrics,start,result.size());
             
         } catch (const std::exception &e) {
-            logger_->error("Redis error: ", e.what());
+            logger_->error("Redis error: {}", e.what());
             metrics.parse_error().Increment();
             std::this_thread::sleep_for(1s);
         }
@@ -354,7 +354,7 @@ void AnalyticsServer::ack_messages(sw::redis::Redis& redis, const std::string& s
         redis.xack(stream,group,ids.begin(),ids.end());
         metrics.message_acked().Increment(ids.size());
     }catch(const std::exception& e){
-        logger_->error("XACK error: ", e.what());
+        logger_->error("XACK error: {}", e.what());
         metrics.ack_error().Increment(ids.size());
     }
     ids.clear();

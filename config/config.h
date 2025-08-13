@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdlib>
 #include <chrono>
+#include <unistd.h>
 #include <spdlog/spdlog.h>
 
 namespace iot::config {
@@ -41,7 +42,7 @@ struct StreamSettings {
     static constexpr const char* stream_name = "telemetry_stream";
     static constexpr const char* alerts_stream = "alerts_stream";
     static constexpr const char* consumer_group = "analytics_group";
-    static constexpr const int pendint_timeout_ms = 5000;
+    static constexpr const int pending_timeout_ms = 5000;
     static constexpr const int max_retries = 3;
     static constexpr size_t num_queue_shards = 4;
 

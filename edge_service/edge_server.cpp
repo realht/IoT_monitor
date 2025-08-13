@@ -186,7 +186,7 @@ void EdgeServer::start_grpc_server() {
 
             //Запуск обработчиков
             for(size_t i =0;i<2;++i){
-                service_->StartPrecessing(cq);
+                service_->StartProcessing(cq);
             }
 
             void* tag;
@@ -228,7 +228,7 @@ void EdgeServer::wait_for_shutdown() {
     server_->Wait();
 }
 
-size_t EdgeServer::get_get_shrd_index(const std::string& key){
+size_t EdgeServer::get_shred_index(const std::string& key){
     return std::hash<std::string>{}(key) % queues_.size();
 }
 
